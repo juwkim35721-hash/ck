@@ -182,6 +182,19 @@ def prune_empty(path: Path, stop: Path, dry_run: bool) -> None:
         current = current.parent
 
 
+def print_changes(changes: list[str], prefix: str) -> None:
+    """스킬 파일 변경은 개수로 묶고, 나머지 변경은 한 줄씩 출력한다."""
+    grouped: dict[str, int] = {}
+    for line in changes:
+        note, _, path = line.partition(": ")
+        if note.startswith(("스킬", "이전 스킬")):
+            grouped[note] = grouped.get(note, 0) + 1
+        else:
+            print(f"{prefix}  {line}")
+    for note, count in grouped.items():
+        print(f"{prefix}  {note}: {count}개 파일")
+
+
 def skill_plan(skills_dir: str) -> dict[Path, bytes]:
     plan: dict[Path, bytes] = {}
     for source in sorted(SKILL_SOURCE.rglob("*")):
@@ -240,8 +253,7 @@ def install(args: argparse.Namespace) -> int:
 
     print(f"과제 루트: {TASK_ROOT}\n도구 폴더: {ROOT}")
     print(f"스킬 {len({p.relative_to(TASK_ROOT / skills_dir).parts[0] for p in plan})}개 → {skills_dir}/")
-    for line in writer.changes:
-        print(("계획  " if args.dry_run else "변경  ") + line)
+    print_changes(writer.changes, "계획" if args.dry_run else "변경")
     for item in kept:
         print(f"보존  사용자가 수정한 이전 스킬 파일은 지우지 않았습니다: {item}")
     if not git_exclude and (git_dir.exists()):
@@ -331,8 +343,7 @@ def uninstall(args: argparse.Namespace) -> int:
             writer.changes.append("git 제외 설정 제거: .git/info/exclude")
             if not args.dry_run:
                 exclude.write_text(strip_exclude(text), encoding="utf-8")
-    for line in writer.changes:
-        print(("계획  " if args.dry_run else "제거  ") + line)
+    print_changes(writer.changes, "계획" if args.dry_run else "제거")
     for item in kept:
         print(f"보존  설치 후 수정된 파일이라 지우지 않았습니다: {item}")
     if args.dry_run:
