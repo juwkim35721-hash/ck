@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Universal HTTP Endpoint & Edge-Case Smoke Tester for Cofa-Probe
-Usage: python3 /tmp/cofa-kit/snippets/smoke_test.py http://127.0.0.1:3000/api/health
+Usage (과제 루트에서): python3 sk/snippets/smoke_test.py http://127.0.0.1:3000/api/health
+Exit code: 0 = 2xx 응답, 1 = 연결 실패 또는 2xx 아님
 """
 import sys
 import time
@@ -33,4 +34,4 @@ def test_endpoint(url, method="GET", payload=None, expect_status=None):
 if __name__ == "__main__":
     base_url = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:3000/"
     print(f"=== 🔍 SMOKE TESTING: {base_url} ===")
-    test_endpoint(base_url, "GET")
+    sys.exit(0 if test_endpoint(base_url, "GET") else 1)

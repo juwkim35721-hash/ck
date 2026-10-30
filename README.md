@@ -1,116 +1,45 @@
-# SK하이닉스 해커톤 대비 — 전략 프롬프트 & 문제 해결 하네스
+# sk — SK하이닉스 해커톤 Codex 키트
 
-[juwkim35721/sk](https://github.com/juwkim35721/sk)는 과제를 **정확히 정의하고, 작은 단위로 구현하고, 실제 증거로 검증하는 과정**을 돕는 공개 준비 도구입니다. 완성된 과제 정답이나 대회 공식 안내를 제공하지 않습니다. 공식 규정과 AI 사용 허용 범위를 확인한 뒤 사용하세요.
+담당자 DM으로 요구사항·제약을 먼저 확정하고, 명세를 한 번에 정리한 뒤 구현·검증·보고서·후속 6문항 대비까지 진행하도록 돕는 **Codex 스킬 36개 + 단계별 전략 프롬프트 36개** 모음입니다. 운영 방법 전체는 [MASTER_GUIDE](playbooks/MASTER_GUIDE.md)에 있습니다. 공식 대회 공지와 과제 문서가 항상 우선합니다.
 
-**스킬은 `skill/` 하나에 18개로 통합했습니다.** 기존 `cofa-*` 6개와 세분화한 `sk-*`의 겹치는 역할은 병합하고, 기본·심화 전략 프롬프트 36개는 `prompts/`의 단계별 Markdown 18개로 제공합니다. `snippets/`, `templates/`의 원본 5개 파일은 그대로 유지합니다.
-
-## 빠른 시작
-
-Python **3.10 이상**, Bash가 필요합니다. 클론할 때만 Git·네트워크가 필요하며, `scripts/install.py`를 Python으로 직접 실행하며 저장소의 로컬 파일만 설치합니다. Codex나 외부 스킬 저장소를 다운로드·업데이트하지 않습니다.
-
-일반 터미널에서 홈 디렉토리 아래 **`sk`**에 클론합니다.
+## 빠른 시작 — 모두 과제 루트에서
 
 ```bash
-cd ~ && git clone https://github.com/juwkim35721/sk sk
+git clone https://github.com/juwkim35721/sk sk
+python3 sk/scripts/install.py
+codex
 ```
 
-실제 과제 폴더가 `~/workspace`인 경우 다음을 실행합니다. 다른 경로이면 `--workspace` 값을 바꾸세요. 폴더는 이미 존재해야 합니다.
+과제 루트는 시험이 준 실제 과제 폴더입니다. 설치 프로그램은 `sk`의 부모 폴더를 과제 루트로 보고, 과제 루트 `AGENTS.md`에 관리 구역을 추가하고, 스킬을 `.agents/skills/`에 복사하고, 작업 노트 폴더 `sk/work/`를 만듭니다. 기존 파일은 덮어쓰기 전에 `sk/.install/backups/`에 백업합니다. 프롬프트는 다른 터미널에서 `python3 sk/scripts/help.py`로 꺼내 봅니다.
 
-```bash
-python3 ~/sk/scripts/install.py --workspace "$HOME/workspace"
-```
+## 구성
 
-그다음 **실제 과제 루트에서** Codex를 실행합니다. `~/sk`는 준비 도구 저장소이므로 과제 작업 위치로 사용하지 않습니다.
+| 경로 | 내용 |
+| :--- | :--- |
+| [`playbooks/MASTER_GUIDE.md`](playbooks/MASTER_GUIDE.md) | 설치 약속, 시간 흐름, DM·명세 동결 전략, 막힐 때 대응, 제출·6문항 대비 |
+| [`prompts/`](prompts/README.md) | 단계별 폴더 10개(`0-start` … `9-qa`)의 전략 프롬프트 |
+| `skill/sk-*/SKILL.md` | 프롬프트와 1:1로 대응하는 스킬 원본 (설치 시 `.agents/skills/`로 복사) |
+| `harness/AGENTS.md` | 과제 루트 `AGENTS.md` 관리 구역에 들어가는 공통 규칙 |
+| `templates/` | 담당자 DM 질문 양식, 보고서 양식, 6문항 암기 카드 양식 |
+| `snippets/` | `data_audit.py`(CSV·JSON·JSONL 감사), `smoke_test.py`(HTTP 도달성 확인) |
+| `scripts/install.py` | 설치·점검(`--check`)·계획(`--dry-run`)·제거(`--uninstall`) |
+| `scripts/help.py` | 프롬프트·템플릿·작업 노트 조회 |
 
-```bash
-cd ~/workspace && codex
-```
+## 단계
 
-제공 버전이 지원하면 Codex에서 `/status`, `/skills`, `/model`을 확인합니다. 모델 선택과 버전 변경은 공식 안내를 따르며, 없는 명령을 쓰기 위해 Codex를 업데이트하지 않습니다.
+| 폴더 | 단계 | 프롬프트 |
+| :--- | :--- | :--- |
+| `0-start` | 착수 | 0.1 context · 0.2 triage · 0.3 code-map |
+| `1-discover` | 요구사항 발굴·담당자 DM | 1.1 requirements · 1.2 ambiguity · 1.3 dm-questions · 1.4 dm-answers · 1.5 dm-confirm |
+| `2-spec` | 구현 전 명세 정리·동결 | 2.1 spec · 2.2 io-contract · 2.3 acceptance · 2.4 spec-gate |
+| `3-plan` | 계획·설계 | 3.1 plan · 3.2 design · 3.3 decision-log |
+| `4-build` | 구현 | 4.1 test-first · 4.2 implement · 4.3 harden |
+| `5-verify` | 검증·증거 | 5.1 verify · 5.2 evidence · 5.3 data-validation · 5.4 api-contract · 5.5 ui-smoke |
+| `6-debug` | 디버깅·복구·시간 관리 | 6.1 debug · 6.2 unstuck · 6.3 rollback · 6.4 resume · 6.5 timebox |
+| `7-review` | 리뷰·준수 감사 | 7.1 review · 7.2 compliance |
+| `8-submit` | 문서화·제출 | 8.1 report · 8.2 deliver |
+| `9-qa` | 후속 서술형 6문항 대비 | 9.1 understand · 9.2 qa-card · 9.3 qa-drill · 9.4 retrospect |
 
-설치 전 계획만 확인하려면 `--dry-run`, 설치 기록을 검사만 하려면 `--check`를 사용합니다.
+## 지키는 것
 
-```bash
-python3 ~/sk/scripts/install.py --workspace "$HOME/workspace" --dry-run
-python3 ~/sk/scripts/install.py --check
-```
-
-`--workspace`를 생략하면 스킬·키트만 설치하고 프로젝트 `AGENTS.md`는 설치하지 않습니다. 개인 연습 환경의 기존 설정도 설치 전에 확인하세요.
-
-## 지금 필요한 프롬프트 고르기
-
-전체 순서와 상황별 선택은 [프롬프트 목록](prompts/README.md), 실전 운영·시간 배분·복구는 [MASTER_GUIDE](playbooks/MASTER_GUIDE.md)에서 확인합니다.
-
-```bash
-bash /tmp/cofa-kit/help.sh list
-bash /tmp/cofa-kit/help.sh 01
-bash /tmp/cofa-kit/help.sh debug
-bash /tmp/cofa-kit/help.sh --search 경계
-```
-
-설치 전에도 `bash ~/sk/scripts/help.sh list`로 볼 수 있습니다. Markdown 안의 **기본 또는 심화 프롬프트 코드 블록만** Codex에 전달하고, `[과제 루트]`, `[남은 시간: 분]` 등은 실제 값으로 바꿉니다. `$sk-define` 같은 호출이 지원되지 않으면 호출 부분을 빼고 자연어 지시로 사용하세요.
-
-기본 흐름은 다음과 같습니다. 매번 12단계를 모두 실행할 필요는 없습니다.
-
-> 환경·기준선 → 문제 정의 → 정책 확인 → 입출력 계약 → 위험 기반 계획 → 최소 설계 → 수직 슬라이스 구현 → 예외 방어 → 독립 검증 → 반증 리뷰 → 제출 준비 → 설명·회고
-
-오류 반복에는 `$sk-debug`, 맥락 손실에는 `$sk-resume`, 시간 부족에는 `$sk-timebox`를 선택합니다. 데이터·API·UI 과제에는 각각 `$sk-data-validation`, `$sk-api-contract`, `$sk-ui-smoke`를 추가합니다.
-
-## 저장소 구성
-
-```text
-sk/
-├── README.md
-├── harness/
-│   ├── AGENTS.md                   # 새 프로젝트 하네스
-│   ├── stages.json                 # 단계·프롬프트·스킬 대응 목록
-│   ├── legacy-skills.json          # 이전 스킬 병합·안전 이전 정보
-│   └── preserved-files.json        # 스니펫·템플릿 5개 파일의 보존 해시
-├── prompts/                        # 단계별 Markdown 18개 + 사용 안내
-├── skill/                          # 중복을 통합한 sk-* 스킬 18개
-├── snippets/                       # 기존 진단 코드 2개, 원본 보존
-├── templates/                      # 기존 양식 3개, 원본 보존
-├── playbooks/
-│   └── MASTER_GUIDE.md              # 처음부터 다시 작성한 실전 운영 가이드
-├── scripts/                        # 설치·도움말·구조 검사
-└── tests/                          # 설치·백업·도움말 통합 테스트
-```
-
-스킬 호출 이름은 **`sk-*`로 통일**합니다. 저장소에서는 `skill/` 한 폴더를 사용하며 Codex가 검색하는 설치 위치는 `~/.agents/skills`와 `~/.codex/skills`입니다. 두 설치 경로의 `skills` 이름은 도구 규약이므로 변경하지 않습니다. 이전 `cofa-*` 역할의 병합 대상과 안전한 정리 방법은 MASTER_GUIDE에 정리했습니다.
-
-이전 버전에서 설치한 중복 스킬을 정리하려면 `python3 ~/sk/scripts/install.py --workspace "$HOME/workspace" --migrate-legacy`를 사용합니다. 알려진 원본과 일치하고 추가 파일이 없는 `cofa-*`만 백업 후 정리하며, 수정본·추가 자료·무관한 스킬은 보존합니다. 먼저 `--dry-run`으로 확인할 수 있습니다. 과거 키트의 구 폴더 복사본은 검색 대상으로 쓰지 않으며 자동 삭제하지 않습니다.
-
-## 설치가 바꾸는 것과 바꾸지 않는 것
-
-키트 기본 위치는 `/tmp/cofa-kit`입니다. 다른 위치가 필요하면 설치와 도움말 실행에 같은 `COFA_KIT_DIR`를 사용하거나 설치 시 `--kit`을 전달합니다.
-
-```bash
-export COFA_KIT_DIR="$HOME/.local/share/sk-kit"
-python3 ~/sk/scripts/install.py --workspace "$HOME/workspace"
-bash "$COFA_KIT_DIR/help.sh" list
-```
-
-설치는 저장소의 실제 파일을 복사합니다. `--workspace`를 지정하면 해당 폴더의 `AGENTS.md`에 새 하네스를 추가합니다. **기존 지시문은 그대로 유지하고 `SK-KIT:BEGIN/END`로 표시된 관리 구역만 추가·갱신**하며, 변경 전 전체 파일을 키트의 `backups/`에 보관합니다. 표시가 손상되거나 중복되면 자동 수정을 거절합니다. 동일 이름의 스킬·키트 파일도 바뀌는 경우 백업합니다. 무관한 스킬은 삭제하지 않습니다.
-
-**전역 `~/.codex/AGENTS.md`는 변경하지 않습니다.** 작업 폴더·클론 폴더를 이동하거나 삭제하지 않고, 외부 저장소를 추가로 가져오지 않으며, Codex 설치·모델·시스템 설정을 변경하지 않습니다. 이전 버전에서 설치한 전역 하네스가 이미 있다면 자동 제거되지 않으므로 충돌 여부를 확인하세요. 설치에 실패한 경우 일부 파일이 이미 복사되었을 수 있으니 첫 오류와 백업을 확인합니다.
-
-`installation.json`은 설치 파일의 해시와 백업 위치를 기록하며, `workspace.txt`에는 지정한 과제 루트가 저장됩니다. `/tmp`는 임시 공간이므로 시스템이 지우면 재설치해야 합니다. 백업을 장기 보관하려면 홈 아래 키트를 선택하세요.
-
-## 검사
-
-개발·개인 연습 환경에서 다음을 실행합니다.
-
-```bash
-cd ~/sk && python3 scripts/check_repo.py
-cd ~/sk && python3 -m unittest discover -s tests -v
-```
-
-구조 검사에는 기존 파일 보존, 단계·스킬 대응, 문서 링크와 셸 문법 확인이 포함됩니다. 통합 테스트는 임시 HOME·과제 폴더·키트에서 설치를 실행하므로 실제 사용자 설정을 건드리지 않습니다. 이 검사는 준비 도구 자체에 대한 검사이며 **해커톤 과제의 정답·채점·Codex 인식까지 보장하지 않습니다.**
-
-## 사용 경계
-
-출시 단계는 기본적으로 **해커톤 제출·릴리스 준비**입니다. 프롬프트나 설치 스크립트가 외부 push·배포·제출 버튼을 자동 실행하지 않습니다. 실제 외부 동작은 별도 권한과 과제 규정을 따릅니다.
-
-원본 `data_audit.py`는 CSV·JSON·JSONL 파일 하나를 받는 보조 감사이고, 원본 `smoke_test.py`는 GET 응답을 출력하는 보조 검사입니다. 지원 형식·중복 판정·종료 코드의 한계는 MASTER_GUIDE에 정리했습니다. 스니펫의 출력만으로 정확성을 단정하지 마세요.
-
-공개 저장소에 비공개 과제·데이터·자격증명·개인 링크를 올리지 않습니다. 후속 평가에서 AI·자료 참조·복사·붙여넣기가 금지되면 해당 단계의 프롬프트·스킬 사용을 중단하고 직접 답합니다. 공식 메일이 제공되지 않았으므로 특정 모델·시험 시각·출제 문항·점수 보장을 주장하지 않습니다.
+Codex는 담당자에게 DM을 보내지 않고 복붙용 메시지만 만듭니다. 외부 push·배포·제출, `git reset --hard`·`clean`·`stash`, 원본 데이터·기존 테스트 삭제, Codex 업데이트는 하지 않습니다. 6문항 대비 자료는 AI 사용이 허용된 시간에만 만들고, AI 금지 단계가 시작되면 사용을 멈춥니다. 작업 노트(`sk/work/`)와 설치 기록(`sk/.install/`)은 이 저장소에 올라가지 않습니다.

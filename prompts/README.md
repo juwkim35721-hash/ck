@@ -1,60 +1,135 @@
 # 단계별 전략 프롬프트
 
-문제 해결을 12개 기본 단계와 6개 보조 상황으로 나누었습니다. 각 Markdown에는 사용 시점·필요 입력·전략·기본 프롬프트·심화/반증 프롬프트·완료 기준을 담았습니다. 단계 이름을 기계적으로 모두 실행하기보다 현재 병목에 필요한 파일을 선택하세요.
+문제를 푸는 과정을 10개 단계 폴더로 나누고, 각 단계에서 쓸 프롬프트를 모았습니다. 모든 프롬프트는 같은 이름의 스킬(`$sk-...`)을 호출하며, 결과를 `sk/work/` 작업 노트의 정해진 섹션에 남깁니다. 전체 운영 흐름은 [MASTER_GUIDE](../playbooks/MASTER_GUIDE.md)를 보세요.
 
-설치·시간 배분·백업 복구는 [MASTER_GUIDE](../playbooks/MASTER_GUIDE.md), 전체 구조는 [저장소 README](../README.md)를 참고하세요. 모든 스킬은 [skill/](../skill)에 통합되어 있으며 기존 `cofa-*`의 역할은 대응하는 `sk-*`로 병합했습니다. `snippets/`, `templates/`는 원본을 보존합니다.
+## 쓰는 법
 
-## 사용 방법
-
-일반 터미널에서 문서를 열고, 코드 블록 안의 프롬프트만 Codex 입력창에 전달합니다. `[과제 루트]`, `[남은 시간: 분]`, `[요구사항/답변]` 등은 실제 값으로 바꾸고, 없는 정보는 미확인으로 남깁니다. `$sk-*` 호출이 지원되지 않으면 호출 부분만 빼고 사용하세요.
+터미널 2(과제 루트)에서 꺼내 Codex 입력창에 붙여 넣습니다. `<...>` 자리는 실제 값으로 바꿉니다.
 
 ```bash
-bash /tmp/cofa-kit/help.sh list
-bash /tmp/cofa-kit/help.sh 01
-bash /tmp/cofa-kit/help.sh debug
-bash /tmp/cofa-kit/help.sh --search 경계
+python3 sk/scripts/help.py            # 전체 목록
+python3 sk/scripts/help.py 1.3 -p     # 1.3의 기본 프롬프트만 출력
+python3 sk/scripts/help.py 1.3 -b     # 심화·변형 블록 목록
+python3 sk/scripts/help.py flow       # 권장 순서
 ```
 
-기본 키트가 아니라면 `COFA_KIT_DIR` 또는 실제 키트 경로를 사용합니다. 설치 전에는 `bash ~/sk/scripts/help.sh 01`로 볼 수 있습니다. 공식 규정상 AI 사용이 허용된 단계에서만 쓰고, 후속 AI 금지 평가에서는 프롬프트·스킬·자료 사용을 중단합니다.
+각 파일은 `언제 쓰나 → 준비할 입력 → 전략 → 기본 프롬프트 → 심화 프롬프트 → 변형 → 결과물 확인 → 다음 단계 → 주의` 순서로 되어 있습니다.
 
-## 기본 12단계
+## 권장 순서
 
-00~05는 먼저 문제·정책·계약·계획을 확인하는 흐름입니다. 06~08은 작은 기능별로 반복하고, 09 리뷰에서 발견한 문제는 06~08로 되돌립니다. 10은 제출 준비이고, 11은 허용되는 설명·인수인계·회고입니다.
+```text
+0 착수      0.1 → 0.2 → 0.3
+1 발굴·DM   1.1 → 1.2 → 1.3 → (내가 DM 전송, 답변 붙여넣기) → 1.4 → 1.5
+2 명세      2.1 → 2.2 → 2.3 → 2.4        ← READY 전에는 구현하지 않음
+3 계획      3.1 → 3.2   (3.3은 결정이 생길 때마다)
+4·5 구현    슬라이스마다 4.1 → 4.2 → 4.3 → 5.1 / 5.2  (+ 5.3 데이터 · 5.4 API · 5.5 UI)
+6 막힐 때    6.1 debug · 6.2 unstuck · 6.3 rollback · 6.4 resume · 6.5 timebox
+7 리뷰      7.1 → 7.2
+마무리      9.1 → 9.4 → 8.1 → 9.2 → 8.2 → 9.3   (6문항 대비는 제출 전 AI 허용 시간에만)
+```
 
-| 단계 | 프롬프트 | 대응 스킬 | 핵심 산출물 |
-| :--- | :--- | :--- | :--- |
-| 00 | [환경·규칙·기준선 확인](00-context.md) | [`$sk-context`](../skill/sk-context/SKILL.md) | 환경·제약 요약, 실제 실행 명령과 결과, 수정 금지 범위, 다음 확인 항목 |
-| 01 | [문제 정의·완료 기준](01-define.md) | [`$sk-define`](../skill/sk-define/SKILL.md) | 요구사항 목록, 수용 기준, 필수 제출 파일, 미확인 가정과 비목표 |
-| 02 | [정책·모호성 확인](02-clarify.md) | [`$sk-clarify`](../skill/sk-clarify/SKILL.md) | 영향도 높은 질문 최대 3개, 정책 결정 기록, 미응답 시 가정·되돌릴 지점 |
-| 03 | [입출력·데이터 계약 분석](03-data-contract.md) | [`$sk-data-contract`](../skill/sk-data-contract/SKILL.md) | 입출력 계약, 데이터 특성·검사 한계, 정책 확인 후보, 계약별 테스트 입력 |
-| 04 | [우선순위·위험 기반 실행 계획](04-plan.md) | [`$sk-plan`](../skill/sk-plan/SKILL.md) | 우선순위 백로그, 시간 예산, 의존성, 단계별 완료 기준, 축소·중단 조건 |
-| 05 | [대안 비교·최소 설계](05-design.md) | [`$sk-design`](../skill/sk-design/SKILL.md) | 대안 비교, 선택 근거, 수정 파일·인터페이스, 최소 구현 순서와 위험 |
-| 06 | [수직 슬라이스 구현](06-implement.md) | [`$sk-implement`](../skill/sk-implement/SKILL.md) | 구현한 요구사항 ID, 변경 파일·함수, 실행 증거, 남은 작업과 한계 |
-| 07 | [예외·경계·불변식 방어](07-harden.md) | [`$sk-harden`](../skill/sk-harden/SKILL.md) | 재현 입력·기대 동작·수정·회귀 테스트 연결, 해당 없음 이유, 잔여 위험 |
-| 08 | [요구사항 추적·독립 검증](08-verify.md) | [`$sk-verify`](../skill/sk-verify/SKILL.md) | 요구사항-테스트 대응, 정확한 명령·통과/실패, 독립 기대값, 미검증 항목 |
-| 09 | [반증 중심 코드 리뷰](09-review.md) | [`$sk-review`](../skill/sk-review/SKILL.md) | 심각도별 근거 있는 발견 사항, 파일·라인·재현, 회귀 영향, 발견 없음과 검토 한계 |
-| 10 | [제출·릴리스 준비](10-deliver.md) | [`$sk-deliver`](../skill/sk-deliver/SKILL.md) | 제출 파일 점검, 재현 명령, 실제 검증 결과, 남은 문제, 제출 전 최종 체크 |
-| 11 | [설명·인수인계·회고](11-retrospect.md) | [`$sk-retrospect`](../skill/sk-retrospect/SKILL.md) | 설계/동작/검증 3문장 설명, 사실 기반 개선점, 인수인계와 연습 질문 |
+## `0-start` — 착수 — 환경·과제 유형·코드 지도
 
-## 보조 상황 6종
+설치 확인, 실행·테스트 기준선, 과제 유형 판별, 기존 코드 구조 파악. 과제 파일은 읽기만 한다.
 
-오류·맥락·시간 문제 또는 해당 과제 유형이 있을 때만 추가합니다. 없는 API·UI·ML 기능을 새로 만들기 위한 목록이 아닙니다.
+| ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
+| :--- | :--- | :--- | :--- | :--- |
+| 0.1 | [환경·규칙·기준선 확인](0-start/0.1-context.md) | `$sk-context` | `BRIEF.md` | — |
+| 0.2 | [과제 유형 판별·공략 경로 선택](0-start/0.2-triage.md) | `$sk-triage` | `BRIEF.md` | — |
+| 0.3 | [기존 코드 지도 작성](0-start/0.3-code-map.md) | `$sk-code-map` | `BRIEF.md` | — |
 
-| 상황 | 프롬프트 | 대응 스킬 | 핵심 산출물 |
-| :--- | :--- | :--- | :--- |
-| 90 | [가설 기반 디버깅](90-debug.md) | [`$sk-debug`](../skill/sk-debug/SKILL.md) | 재현 명령, 원인 가설·판별 근거, 최소 수정, 재실행 결과 |
-| 91 | [맥락 복구·작업 인수인계](91-resume.md) | [`$sk-resume`](../skill/sk-resume/SKILL.md) | 짧은 상태 캡슐, 사실·주장 구분, 마지막 검증, 다음 작업 하나 |
-| 92 | [시간 부족·범위 축소](92-timebox.md) | [`$sk-timebox`](../skill/sk-timebox/SKILL.md) | 남은 시간 예산, P0/P1 작업, 중단 목록, 최소 검증·제출 순서 |
-| 93 | [집계·이상탐지 데이터 검증](93-data-validation.md) | [`$sk-data-validation`](../skill/sk-data-validation/SKILL.md) | 포함/제외 규칙, 독립 합계·행 수, 누수·시간 경계 검사, 재현 가능한 검증 결과 |
-| 94 | [API 계약·상태 전이 검증](94-api-contract.md) | [`$sk-api-contract`](../skill/sk-api-contract/SKILL.md) | 메서드/경로별 계약 테스트, 본문 assert, 상태 전이·멱등성 결과, 미검증 항목 |
-| 95 | [UI 핵심 흐름·접근성 점검](95-ui-smoke.md) | [`$sk-ui-smoke`](../skill/sk-ui-smoke/SKILL.md) | 사용자 흐름별 기대/실제, 화면·API 연동 확인, 접근성·실패 상태, 미검증 목록 |
+## `1-discover` — 요구사항 발굴·담당자 DM
 
-## 프롬프트를 연결하는 공통 계약
+문서·코드·테스트·데이터에서 요구사항과 제약을 뽑고, 모호성을 찾아 담당자 DM으로 확정한다. 이 단계가 구현 품질을 결정한다.
 
-요구사항은 `R1`, `R2` 같은 ID로 구분하고 수용 기준·구현·테스트를 연결합니다. 다음 단계에는 실제 확인한 정책, 변경 파일·함수, 정확한 실행 명령·결과, 남은 위험만 전달합니다. 새 보고서 파일은 과제가 요구하거나 사용자가 요청한 경우 지정 경로에만 저장합니다.
+| ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
+| :--- | :--- | :--- | :--- | :--- |
+| 1.1 | [요구사항·제약·제출물 추출](1-discover/1.1-requirements.md) | `$sk-requirements` | `DISCOVERY.md` | — |
+| 1.2 | [모호성·충돌·누락 탐지](1-discover/1.2-ambiguity.md) | `$sk-ambiguity` | `DISCOVERY.md` | `sk/snippets/data_audit.py` |
+| 1.3 | [담당자 DM 질문 설계 (DM 템플릿 사용)](1-discover/1.3-dm-questions.md) | `$sk-dm-questions` | `DM_LOG.md` | `sk/templates/DM_QUESTION_TEMPLATES.txt` |
+| 1.4 | [담당자 답변 기록·해석·후속 질문](1-discover/1.4-dm-answers.md) | `$sk-dm-log` | `DM_LOG.md` | — |
+| 1.5 | [이해 재진술·최종 확인 메시지](1-discover/1.5-dm-confirm.md) | `$sk-dm-confirm` | `DM_LOG.md`, `SPEC.md` | — |
 
-읽기 전용 분석·계획·리뷰와 수정·테스트 실행을 구분합니다. 원본 데이터와 관련 없는 변경을 보존하고, 스펙 밖 기본값·임의 중복 제거·실패 테스트 삭제로 문제를 숨기지 않습니다. 장황한 사고과정 대신 간결한 판단 근거와 검증 증거를 요청합니다.
+## `2-spec` — 구현 전 명세 정리·동결
 
-`출시`는 기본적으로 해커톤 제출·릴리스 준비입니다. 외부 push·배포·실제 제출 버튼 조작·민감정보 전송은 자동 수행하지 않으며 별도 권한과 공식 규정을 따릅니다.
+흩어진 요구사항·제약·DM 답변·가정을 SPEC.md 한 곳에 정리하고, 수용 테스트 표를 만든 뒤 구현 착수 여부를 판정한다.
 
-이 인덱스는 `harness/stages.json`을 기준으로 `python3 scripts/build_prompt_index.py`에서 재생성할 수 있습니다.
+| ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
+| :--- | :--- | :--- | :--- | :--- |
+| 2.1 | [명세 통합 (SPEC.md)](2-spec/2.1-spec.md) | `$sk-spec` | `SPEC.md` | — |
+| 2.2 | [입출력·데이터 계약 (data_audit.py 사용)](2-spec/2.2-io-contract.md) | `$sk-data-contract` | `SPEC.md` | `sk/snippets/data_audit.py` |
+| 2.3 | [수용 기준·테스트 케이스 표](2-spec/2.3-acceptance.md) | `$sk-acceptance` | `SPEC.md` | — |
+| 2.4 | [구현 착수 게이트·명세 동결](2-spec/2.4-spec-gate.md) | `$sk-spec-gate` | `SPEC.md` | — |
+
+## `3-plan` — 계획·설계
+
+명세를 작은 수직 슬라이스와 시간 예산으로 나누고, 최소 설계와 결정 근거를 기록한다.
+
+| ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
+| :--- | :--- | :--- | :--- | :--- |
+| 3.1 | [슬라이스·시간 예산 계획](3-plan/3.1-plan.md) | `$sk-plan` | `PLAN.md` | — |
+| 3.2 | [최소 설계·대안 비교](3-plan/3.2-design.md) | `$sk-design` | `DECISIONS.md` | — |
+| 3.3 | [설계 결정·AI 교정 즉시 기록](3-plan/3.3-decision-log.md) | `$sk-decision-log` | `DECISIONS.md` | — |
+
+## `4-build` — 구현
+
+수용 테스트를 먼저 세우고, 슬라이스 하나씩 최소 변경으로 구현한 뒤 관련 엣지 케이스를 방어한다.
+
+| ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
+| :--- | :--- | :--- | :--- | :--- |
+| 4.1 | [실패하는 수용 테스트 먼저 작성](4-build/4.1-test-first.md) | `$sk-test-first` | `SPEC.md`, `EVIDENCE.md` | — |
+| 4.2 | [슬라이스 하나 최소 변경 구현](4-build/4.2-implement.md) | `$sk-implement` | `PLAN.md`, `SPEC.md`, `DECISIONS.md` | — |
+| 4.3 | [관련 엣지 케이스 방어](4-build/4.3-harden.md) | `$sk-harden` | `SPEC.md`, `EVIDENCE.md` | — |
+
+## `5-verify` — 검증·증거
+
+요구사항별로 독립 근거가 있는 검증을 실행하고 재현 가능한 증거를 남긴다.
+
+| ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
+| :--- | :--- | :--- | :--- | :--- |
+| 5.1 | [요구사항 추적 검증](5-verify/5.1-verify.md) | `$sk-verify` | `SPEC.md`, `EVIDENCE.md` | — |
+| 5.2 | [실행 증거 기록](5-verify/5.2-evidence.md) | `$sk-evidence` | `EVIDENCE.md` | — |
+| 5.3 | [데이터 정합성 독립 검산 (data_audit.py 사용)](5-verify/5.3-data-validation.md) | `$sk-data-validation` | `EVIDENCE.md` | `sk/snippets/data_audit.py` |
+| 5.4 | [API 계약 검증 (smoke_test.py 사용)](5-verify/5.4-api-contract.md) | `$sk-api-contract` | `EVIDENCE.md` | `sk/snippets/smoke_test.py` |
+| 5.5 | [UI 핵심 흐름 확인 (smoke_test.py 사용)](5-verify/5.5-ui-smoke.md) | `$sk-ui-smoke` | `EVIDENCE.md` | `sk/snippets/smoke_test.py` |
+
+## `6-debug` — 디버깅·복구·시간 관리
+
+실패를 가설로 좁혀 고치고, AI가 헛돌거나 맥락을 잃거나 시간이 부족할 때 안전하게 복구한다.
+
+| ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
+| :--- | :--- | :--- | :--- | :--- |
+| 6.1 | [가설 기반 디버깅](6-debug/6.1-debug.md) | `$sk-debug` | `EVIDENCE.md`, `DECISIONS.md` | — |
+| 6.2 | [AI 반복 루프 탈출](6-debug/6.2-unstuck.md) | `$sk-unstuck` | `PLAN.md` | — |
+| 6.3 | [내 변경만 안전하게 되돌리기](6-debug/6.3-rollback.md) | `$sk-rollback` | `PLAN.md`, `EVIDENCE.md` | — |
+| 6.4 | [맥락 복구·작업 재개](6-debug/6.4-resume.md) | `$sk-resume` | `PLAN.md` | — |
+| 6.5 | [시간 부족 시 범위 축소](6-debug/6.5-timebox.md) | `$sk-timebox` | `PLAN.md` | — |
+
+## `7-review` — 리뷰·준수 감사
+
+변경을 반증하려는 시각으로 검토하고, 명세·DM 답변·제약이 실제 코드와 증거에 모두 반영됐는지 감사한다.
+
+| ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
+| :--- | :--- | :--- | :--- | :--- |
+| 7.1 | [반증 중심 코드 리뷰](7-review/7.1-review.md) | `$sk-review` | `REVIEW.md` | — |
+| 7.2 | [명세·DM 반영 준수 감사](7-review/7.2-compliance.md) | `$sk-compliance` | `REVIEW.md` | — |
+
+## `8-submit` — 문서화·제출
+
+증거에 근거한 보고서를 템플릿으로 작성하고, 제출 전 최종 점검과 도구 정리 판단을 한다.
+
+| ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
+| :--- | :--- | :--- | :--- | :--- |
+| 8.1 | [보고서 작성 (SUBMISSION 템플릿 사용)](8-submit/8.1-report.md) | `$sk-report` | `SPEC.md`, `DM_LOG.md`, `DECISIONS.md`, `EVIDENCE.md`, `UNDERSTANDING.md` | `sk/templates/SUBMISSION_DOC_TEMPLATE.md` |
+| 8.2 | [제출 전 최종 점검·도구 정리](8-submit/8.2-deliver.md) | `$sk-deliver` | `EVIDENCE.md` | — |
+
+## `9-qa` — 후속 서술형 6문항 대비
+
+내가 구현한 것을 실제 코드·결정·증거로 이해하고 Q1~Q6(설계 의도, 동작 원리, 예외 방어, 검증·AI 교정, 업무 맥락, 한계·개선)에 내 말로 답할 수 있게 준비한다. AI 사용이 허용된 단계에서만 사용한다.
+
+| ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
+| :--- | :--- | :--- | :--- | :--- |
+| 9.1 | [내 구현 이해 지도](9-qa/9.1-understand.md) | `$sk-understand` | `UNDERSTANDING.md` | — |
+| 9.2 | [6문항 암기 카드 (POST_QA 템플릿 사용)](9-qa/9.2-qa-card.md) | `$sk-qa-card` | `QA_CARD.md` | `sk/templates/POST_QA_6_TEMPLATE.md` |
+| 9.3 | [설명 연습·꼬리질문 대비](9-qa/9.3-qa-drill.md) | `$sk-qa-drill` | `QA_CARD.md` | — |
+| 9.4 | [한계·개선안 정리](9-qa/9.4-retrospect.md) | `$sk-retrospect` | `UNDERSTANDING.md` | — |

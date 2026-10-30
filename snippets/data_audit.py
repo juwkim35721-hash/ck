@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Universal Data Auditor for Cofa-Probe (CSV / JSON / JSONL)
-Usage: python3 /tmp/cofa-kit/snippets/data_audit.py <path_to_data_file>
+Usage (과제 루트에서): python3 sk/snippets/data_audit.py <path_to_data_file>
 """
 import csv
 import json

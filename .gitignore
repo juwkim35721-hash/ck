@@ -1,11 +1,5 @@
+# 과제 중 생성되는 작업 노트와 설치 기록은 저장소에 올리지 않습니다.
+work/
+.install/
 __pycache__/
-*.py[cod]
-.pytest_cache/
-.venv/
-.env
-.env.*
-!.env.example
-.DS_Store
-installation.json
-workspace.txt
-backups/
+*.pyc
