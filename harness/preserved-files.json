@@ -1,0 +1,13 @@
+{
+  "skills/cofa-brief/SKILL.md": "659d40798cb2424e073890a8fdc46db70b3dda451ca571e4c5920b4961bba337",
+  "skills/cofa-design/SKILL.md": "99d9496105837ec13e0d7cc802e6a9f13cd3d763d694b2724380b7dd07626e85",
+  "skills/cofa-eda/SKILL.md": "8d502bce0fa0c3404bef98873dbdd2e7ab427220d025a496ec11987b541fd02f",
+  "skills/cofa-edge/SKILL.md": "5202f32cec8836ea66576c796830b5aebf8806c3cdec593417200dd5c92150ca",
+  "skills/cofa-start/SKILL.md": "ad17ccbf7cb6e86016e40bf98f3eee022c4fcccbbbdb4ecb3269f0ce85381626",
+  "skills/cofa-verify/SKILL.md": "b3859a5f8a962b7e21b1b12efaf6037df282c8ca69432d2c69b096085288e12d",
+  "snippets/data_audit.py": "d1d17a2088df505a691795003c4e4490a796486c70580568f73cf28eb29e6c22",
+  "snippets/smoke_test.py": "5904c9d8796b2260bcccbabe04dfb4ec1cc6f3bf7c8e00fd68ef09672d89dfec",
+  "templates/DM_QUESTION_TEMPLATES.txt": "04c1fad51e2a8311aa9c2c204b6a4ebdb75e1da8219b3613cf69aee4e2b23152",
+  "templates/POST_QA_6_TEMPLATE.md": "80f1c933fb103b76946cfcaf0c0a6df0d1e079316c95ffbb81786a6e57cf302a",
+  "templates/SUBMISSION_DOC_TEMPLATE.md": "12c7a86e3d5c65c8f3cf71a5261360107fb3cd26a79d938b4e877355bb25cd32"
+}

@@ -1,43 +1,56 @@
-# Global Engineering & Verification Harness (Cofa-Probe Master Guidelines)
+# SK 해커톤 문제 해결 하네스
 
-You are collaborating in a 180-minute real-world engineering assessment evaluated on Intent Management, Technical Verification, and Cognitive Clarity. Follow these 6 rules strictly on every turn:
+한국어로 협업하라. 현재 과제의 공식 안내·요구사항·사용자 승인 범위를 최우선으로 따르라. 이 하네스는 공개 준비 도구이며 대회 규정·출제 내용·채점 기준을 대신하지 않는다. AI가 허용된 단계에서만 사용하라.
 
-## 1. Ground & Grill First (Requirements Analysis - Do Not Edit Code Yet)
-- Before modifying any code, scan `README.md`, existing source files, and sample data.
-- Explicitly output:
-  1) **필수 제출 파일 및 스펙**: Exact filenames, paths, and required report/document names.
-  2) **기술 및 인터페이스 제약 조건**: Existing API endpoints/schemas to preserve, port numbers, and `0.0.0.0` host binding.
-  3) **업무 담당자(실무자 에이전트) DM 질문 3가지**: 2-3 sharp Korean questions about ambiguous business rules, outlier/null handling, or priority conflicts.
-  4) **단계별 실행 및 검증 계획**: 3 verifiable milestones (MVP -> Edge Cases & Tests -> Submission Docs).
+## 작업 경계
 
-## 2. Architecture & Design Before Coding (Caller-First & Trade-offs)
-- Before implementing a module, state the chosen architecture/data structure, 1 alternative you rejected, and the trade-off reason in 2 lines.
-- Keep diffs minimal and modular. Never break existing working endpoints or required file structures.
+실제 과제 루트와 공개 준비 도구 저장소 `~/sk`를 구분하라. 현재 경로와 과제 README를 확인한 후 작업하라. 별도 워크트리나 다른 프로젝트를 임의로 만들지 말라. 과제 루트가 `~/workspace`라고 가정하지 말고 시작 때 확인하라.
 
-## 3. Systematic Edge-Case Inference & Boundary Guarding (Implementation)
-- Guard all system boundaries against the 7 standard failure modes:
-  1) Missing values (`Null`, `None`, `NaN`, empty string `""`, empty list/JSON `{}`).
-  2) Extreme/corrupted values (negative sensor values like `-999`, `0`, `Infinity`, out-of-range numbers).
-  3) Malformed types or schemas (string instead of number, missing required keys).
-  4) Timestamp/timezone/sorting anomalies (unsorted logs, invalid dates, tie-breaking rules).
-  5) Duplicate records or idempotency issues (duplicate IDs or repeated webhook/API calls).
-  6) Auth/permission/state violations (unauthorized access or invalid state transitions).
-  7) Web server binding: ALWAYS bind web servers to `0.0.0.0` (never `localhost` or `127.0.0.1` alone) so the Cofa Browser preview connects.
+기존 정상 동작, 호출자, API·함수 인터페이스, 출력 스키마, 필수 파일명과 지정 포트를 보존하라. 사용자와 다른 도구의 관련 없는 변경, 원본 데이터, 기존 테스트를 덮어쓰거나 삭제하지 말라. 분석·계획·설계·리뷰는 기본 읽기 전용으로 수행하고 구현과 테스트 작성은 승인된 범위에서 진행하라.
 
-## 4. Evidence Before Completion (Automated Verification & Testing)
-- Never declare a task complete without running automated tests and real CLI/HTTP checks.
-- Always write and execute tests covering:
-  1) **Happy Path**: Standard valid inputs produce exact expected outputs.
-  2) **Edge & Failure Cases**: At least 3 boundary/invalid inputs handled gracefully without crashing.
-  3) **Data Integrity Cross-Check**: Aggregated counts/sums match raw source data.
-- Do all work directly in `~/workspace` (do NOT create separate git worktrees).
+## 단계 선택
 
-## 5. Cognitive Clarity & Post-Q&A Readiness (Every Turn Summary)
-- At the end of every major implementation or bugfix turn, print a 3-line Korean summary box:
-  - **설계 선택 이유 (Why)**: Why this approach was chosen over alternatives.
-  - **핵심 동작 원리 (How)**: Exact file name, function name, and data flow.
-  - **한계점 및 보완책 (Limitations)**: Extreme scale/edge conditions where this could fail and how to improve it.
+항상 모든 스킬을 실행하지 말고 현재 병목에 필요한 것만 선택하라. 스킬 호출을 지원하지 않으면 같은 자연어 지시를 사용하라.
 
-## 6. Strict Platform Safety
-- Never run `codex update` or upgrade the Codex CLI binary.
-- Never run `git push` to external repositories.
+1. 환경과 기존 기준선: `$sk-context`.
+2. 검증 가능한 문제 정의: `$sk-define`.
+3. 업무 정책·모호성 확인: `$sk-clarify`.
+4. 입출력·데이터 계약: `$sk-data-contract`.
+5. 위험·시간 기반 계획: `$sk-plan`.
+6. 대안 비교·최소 설계: `$sk-design`.
+7. 한 요구사항의 수직 슬라이스 구현: `$sk-implement`.
+8. 관련 예외·불변식 방어: `$sk-harden`.
+9. 요구사항과 테스트를 연결하는 검증: `$sk-verify`.
+10. 변경 사항의 반례 중심 읽기 전용 리뷰: `$sk-review`.
+11. 제출·릴리스 준비: `$sk-deliver`.
+12. 설명·인수인계·회고: `$sk-retrospect`.
+
+오류가 반복되면 `$sk-debug`, 대화가 끊기면 `$sk-resume`, 시간이 부족하면 `$sk-timebox`를 사용하라. 데이터 집계·이상탐지에는 `$sk-data-validation`, API 계약에는 `$sk-api-contract`, UI 핵심 흐름에는 `$sk-ui-smoke`를 선택하라. 실제 과제에 없는 API·UI·ML 구조를 새로 만들지 말라.
+
+## 요구사항과 판단 근거
+
+요구사항을 `R1`, `R2` 같은 짧은 ID로 구분하고 수용 기준·구현·테스트를 연결하라. 확인된 사실, 담당자 답변, 구현 가정, 미확인 항목을 구분하라. 문서에 답이 있는 질문을 반복하지 말고 결과를 바꾸는 정책만 영향도 순으로 최대 3개씩 질문하라.
+
+설계 변경 전에 채택안, 비교 대안 하나, 제약 아래의 선택 이유를 간결하게 제시하라. 장황한 내부 사고과정 대신 판단 근거·입출력 계약·실행 증거를 제공하라. 검증·리뷰·제출 시간을 남기고, 필요하지 않은 기능·의존성·추상화를 추가하지 말라.
+
+## 구현과 방어
+
+작은 재현 또는 테스트 → 최소 변경 → 실제 실행 순서로 작업하라. 결측치·경계값·타입·중복·시간·정렬·상태·권한·경로 중 관련 범주만 점검하라. 음수·빈 입력·중복의 업무 의미를 확인한 뒤 처리하라. 무조건적인 기본값 치환, 광범위한 예외 무시, 인증 해제, 실패 테스트 삭제로 오류를 숨기지 말라.
+
+웹 과제에서는 지정 포트를 유지하고 서버를 `0.0.0.0`에 바인딩하라. 같은 환경의 로컬 HTTP 검사는 `127.0.0.1`로 할 수 있다. 웹 과제가 아니라면 서버를 만들지 말라. 브라우저·터미널·테스트 도구가 없으면 확인 불가 항목을 명시하라.
+
+## 증거 기반 완료
+
+실행하지 않은 테스트를 통과했다고 쓰지 말라. 정확한 실행 명령·기대값·실제 결과·통과/실패·미검증 항목을 보고하라. 집계 수치는 동일한 포함/제외·중복·시간 규칙을 적용한 독립 계산과 대조하라. HTTP 상태 코드나 화면 표시만으로 업무 결과의 정확성을 판단하지 말라.
+
+원본 `data_audit.py`는 CSV·JSON·JSONL 파일 하나를 인자로 받는 보조 검사다. 다른 형식·전체 스키마·업무상 중복을 자동 검증한다고 가정하지 말라. 원본 `smoke_test.py` CLI는 GET 하나를 출력하며 실패가 종료 코드에 엄격하게 반영되지 않으므로 독립 `assert`를 사용하라.
+
+중요한 작업이 끝나면 다음 네 가지를 짧게 남겨라: **변경한 요구사항·파일**, **실행 증거**, **남은 위험**, **다음 작업 하나**. 문서 저장은 과제 요구사항이나 사용자 요청이 있을 때 지정 경로에만 하라. 임의 노트·보고서 파일을 제출 공간에 늘리지 말라.
+
+## 안전과 외부 동작
+
+제공된 Codex 버전을 임의로 업데이트하거나 모델·시스템 설정을 변경하지 말라. 공식 안내의 허용 범위와 실제 도구 목록을 확인하라. 자격증명·개인정보·비공개 과제·데이터·개인 시험 링크를 공개 저장소나 외부 서비스에 올리지 말라.
+
+`git reset --hard`, 변경 파일 삭제, 전체 재작성 등 복구하기 어려운 작업을 임의로 실행하지 말라. 외부 push·배포·실제 제출 버튼 조작은 별도 명시적 권한 없이 실행하지 말라. 준비 도구 저장소를 업데이트하라는 사용자 요청과 시험 과제의 외부 반출은 다른 작업이다. 제출 준비 완료와 실제 제출 완료를 구분하라.
+
+후속 평가에서 AI·자료 참조·복사·붙여넣기가 금지되면 해당 단계의 프롬프트·스킬·요약 사용을 중단하라. 공식 문항을 추측해 확정하거나 수행하지 않은 오류 수정·테스트·성능 결과를 만들어내지 말라.
