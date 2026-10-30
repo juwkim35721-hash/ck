@@ -19,7 +19,8 @@ python3 sk/scripts/help.py flow       # 권장 순서
 
 ```text
 0 착수      0.1 → 0.2 → 0.3
-1 발굴·DM   1.1 → 1.2 → 1.3 → (내가 DM 전송, 답변 붙여넣기) → 1.4 → 1.5
+1 발굴·DM   1.0 (권장: 스캔 → 질문 → 답변 붙여넣기 → 후속 질문을 라운드로 반복)
+            또는 1.1 → 1.2 → 1.3 → (내가 DM 전송, 답변 붙여넣기) → 1.4 → 1.5
 2 명세      2.1 → 2.2 → 2.3 → 2.4        ← READY 전에는 구현하지 않음
 3 계획      3.1 → 3.2   (3.3은 결정이 생길 때마다)
 4·5 구현    슬라이스마다 4.1 → 4.2 → 4.3 → 5.1 / 5.2  (+ 5.3 데이터 · 5.4 API · 5.5 UI)
@@ -44,6 +45,7 @@ python3 sk/scripts/help.py flow       # 권장 순서
 
 | ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
 | :--- | :--- | :--- | :--- | :--- |
+| 1.0 | [질의 루프 — 전체 스캔·DM·후속 질문 반복](1-discover/1.0-clarify-loop.md) | `$sk-clarify-loop` | `DISCOVERY.md`, `DM_LOG.md` | `sk/templates/DM_QUESTION_TEMPLATES.txt`, `sk/snippets/data_audit.py` |
 | 1.1 | [요구사항·제약·제출물 추출](1-discover/1.1-requirements.md) | `$sk-requirements` | `DISCOVERY.md` | — |
 | 1.2 | [모호성·충돌·누락 탐지](1-discover/1.2-ambiguity.md) | `$sk-ambiguity` | `DISCOVERY.md` | `sk/snippets/data_audit.py` |
 | 1.3 | [담당자 DM 질문 설계 (DM 템플릿 사용)](1-discover/1.3-dm-questions.md) | `$sk-dm-questions` | `DM_LOG.md` | `sk/templates/DM_QUESTION_TEMPLATES.txt` |

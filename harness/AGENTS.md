@@ -18,7 +18,7 @@
 | 단계 | 스킬 (순서대로) |
 | :--- | :--- |
 | 0 착수 | `$sk-context` → `$sk-triage` → `$sk-code-map` |
-| 1 발굴·담당자 DM | `$sk-requirements` → `$sk-ambiguity` → `$sk-dm-questions` → (사용자가 DM 전송·답변 붙여넣기) → `$sk-dm-log` → `$sk-dm-confirm` |
+| 1 발굴·담당자 DM | `$sk-clarify-loop`(스캔·질문·답변 반영을 라운드로 반복, 권장) 또는 `$sk-requirements` → `$sk-ambiguity` → `$sk-dm-questions` → (사용자가 DM 전송·답변 붙여넣기) → `$sk-dm-log` → `$sk-dm-confirm` |
 | 2 명세 | `$sk-spec` → `$sk-data-contract` → `$sk-acceptance` → `$sk-spec-gate` |
 | 3 계획·설계 | `$sk-plan` → `$sk-design`, 수시로 `$sk-decision-log` |
 | 4 구현 루프 | 슬라이스마다 `$sk-test-first` → `$sk-implement` → `$sk-harden` → `$sk-verify` / `$sk-evidence` |

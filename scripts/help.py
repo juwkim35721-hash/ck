@@ -30,7 +30,8 @@ NOTES = ["BRIEF", "DISCOVERY", "DM_LOG", "SPEC", "PLAN", "DECISIONS", "EVIDENCE"
          "UNDERSTANDING", "QA_CARD", "REPORT_DRAFT"]
 FLOW = """권장 진행 순서 (상세: sk/playbooks/MASTER_GUIDE.md)
   0 착수      0.1 context → 0.2 triage → 0.3 code-map
-  1 발굴·DM   1.1 requirements → 1.2 ambiguity → 1.3 dm-questions → (DM 전송·답변) → 1.4 dm-answers → 1.5 dm-confirm
+  1 발굴·DM   1.0 clarify-loop (권장: 스캔 → 질문 → 답변 붙여넣기 → 후속 질문 반복)
+              또는 1.1 requirements → 1.2 ambiguity → 1.3 dm-questions → (DM 전송·답변) → 1.4 dm-answers → 1.5 dm-confirm
   2 명세      2.1 spec → 2.2 io-contract → 2.3 acceptance → 2.4 spec-gate   ← READY 전에는 구현하지 않음
   3 계획      3.1 plan → 3.2 design   (3.3 decision-log는 수시로)
   4 구현 루프  슬라이스마다 4.1 test-first → 4.2 implement → 4.3 harden → 5.1 verify / 5.2 evidence

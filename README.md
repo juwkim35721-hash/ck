@@ -1,6 +1,6 @@
 # sk — SK하이닉스 해커톤 Codex 키트
 
-담당자 DM으로 요구사항·제약을 먼저 확정하고, 명세를 한 번에 정리한 뒤 구현·검증·보고서·후속 6문항 대비까지 진행하도록 돕는 **Codex 스킬 36개 + 단계별 전략 프롬프트 36개** 모음입니다. 운영 방법 전체는 [MASTER_GUIDE](playbooks/MASTER_GUIDE.md)에 있습니다. 공식 대회 공지와 과제 문서가 항상 우선합니다.
+담당자 DM으로 요구사항·제약을 먼저 확정하고, 명세를 한 번에 정리한 뒤 구현·검증·보고서·후속 6문항 대비까지 진행하도록 돕는 **Codex 스킬 37개 + 단계별 전략 프롬프트 37개** 모음입니다. 운영 방법 전체는 [MASTER_GUIDE](playbooks/MASTER_GUIDE.md)에 있습니다. 공식 대회 공지와 과제 문서가 항상 우선합니다.
 
 ## 빠른 시작 — 모두 과제 루트에서
 
@@ -30,7 +30,7 @@ codex
 | 폴더 | 단계 | 프롬프트 |
 | :--- | :--- | :--- |
 | `0-start` | 착수 | 0.1 context · 0.2 triage · 0.3 code-map |
-| `1-discover` | 요구사항 발굴·담당자 DM | 1.1 requirements · 1.2 ambiguity · 1.3 dm-questions · 1.4 dm-answers · 1.5 dm-confirm |
+| `1-discover` | 요구사항 발굴·담당자 DM | **1.0 clarify-loop**(스캔·질문·후속 질문 반복) · 1.1 requirements · 1.2 ambiguity · 1.3 dm-questions · 1.4 dm-answers · 1.5 dm-confirm |
 | `2-spec` | 구현 전 명세 정리·동결 | 2.1 spec · 2.2 io-contract · 2.3 acceptance · 2.4 spec-gate |
 | `3-plan` | 계획·설계 | 3.1 plan · 3.2 design · 3.3 decision-log |
 | `4-build` | 구현 | 4.1 test-first · 4.2 implement · 4.3 harden |

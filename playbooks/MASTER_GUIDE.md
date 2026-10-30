@@ -17,7 +17,7 @@
 ├── README.md, src/, data/ …     ← 과제 파일 (Codex가 구현하는 대상)
 ├── sk/                          ← 이 저장소 (도구. 과제 코드가 아님)
 │   ├── prompts/0-start … 9-qa/  ← 단계별 전략 프롬프트
-│   ├── skill/sk-*/SKILL.md      ← 스킬 원본 36개
+│   ├── skill/sk-*/SKILL.md      ← 스킬 원본 37개
 │   ├── templates/  snippets/    ← 템플릿 3종, 스니펫 2종
 │   ├── scripts/install.py, help.py
 │   └── work/                    ← 작업 노트 (설치 시 생성, git에 안 올라감)
@@ -28,7 +28,7 @@
 설치가 하는 일은 네 가지뿐입니다.
 
 1. 과제 루트 `AGENTS.md`에 `SK-KIT:BEGIN/END` 관리 구역을 추가합니다. 기존 내용은 그대로 두고, 바뀌는 파일은 먼저 `sk/.install/backups/`에 백업합니다.
-2. `sk/skill/`의 36개 스킬을 `.agents/skills/`로 복사합니다. Codex는 실행 위치의 `.agents/skills`를 읽습니다.
+2. `sk/skill/`의 37개 스킬을 `.agents/skills/`로 복사합니다. Codex는 실행 위치의 `.agents/skills`를 읽습니다.
 3. 과제 루트가 git 저장소라면 `.git/info/exclude`에 `sk/`, 설치한 스킬, 새로 만든 `AGENTS.md`를 넣어 `git status`를 깨끗하게 유지합니다. 이 설정은 로컬 전용이라 커밋되지 않습니다.
 4. 작업 노트 폴더 `sk/work/`를 만듭니다.
 
@@ -82,8 +82,8 @@ Codex 입력창에서 차례로 확인합니다.
 | :--- | :--- | :--- | :--- |
 | 10:00–10:05 | 설치·기동 | 2절 명령 | `/skills`에 `sk-*` 표시 |
 | 10:05–10:12 | **0 착수** | 0.1 → 0.2 → 0.3 | `BRIEF.md`에 실행·테스트 명령, 기준선, 과제 유형, 코드 지도 |
-| 10:12–10:22 | **1 발굴·DM** | 1.1 → 1.2 → 1.3 | **첫 DM 발송** (늦어도 10:22) |
-| 10:22–10:40 | **1·2 정리·동결** | (기다리며 2.2, 0.3 보강) → 1.4 → 2.1 → 2.3 → 1.5 → 2.4 | `SPEC.md` 0절이 READY 또는 READY-WITH-ASSUMPTIONS |
+| 10:12–10:22 | **1 발굴·DM** | 1.0 라운드 0 (개별 진행: 1.1 → 1.2 → 1.3) | **첫 DM 발송** (늦어도 10:22) |
+| 10:22–10:40 | **1·2 정리·동결** | (기다리며 2.2, 0.3 보강) → 1.0 답변 라운드 반복·마감 → 2.1 → 2.3 → 2.4 (개별 진행: 1.4 → 2.1 → 2.3 → 1.5 → 2.4) | `SPEC.md` 0절이 READY 또는 READY-WITH-ASSUMPTIONS |
 | 10:40–10:50 | 3 계획·설계 | 3.1 → 3.2 | `PLAN.md` 슬라이스, `DECISIONS.md` DD 1~2개 |
 | 10:50–12:00 | 4·5 구현 루프 | 슬라이스마다 4.1 → 4.2 → 4.3 → 5.1/5.2 (+ 5.3·5.4·5.5) | P0 슬라이스 모두 PASS 증거 |
 | 12:00–12:15 | 7 리뷰 | 7.1 → 7.2 → 승인한 수정 | 차단·높음 발견(F) 해결 또는 한계로 기록 |
@@ -104,6 +104,25 @@ Codex 입력창에서 차례로 확인합니다.
                      ┌────────────────────────────────────────────────────────────────┘
                      └─→ 2.1 SPEC 통합 ─→ 2.3 수용 테스트 표 ─→ 1.5 재진술 확인 DM ─→ 2.4 게이트(동결)
 ```
+
+### 4.0 한 번에 돌리는 질의 루프 (1.0 clarify-loop) — 권장
+
+1.1~1.5를 하나씩 부르는 대신 `$sk-clarify-loop` 하나로 **스캔 → 질문 → 답변 반영 → 후속 질문**을 라운드로 반복할 수 있습니다. 세부 규칙은 1.1~1.5 스킬을 그대로 따르고, 루프는 라운드 진행과 판정만 맡습니다.
+
+```text
+R0  python3 sk/scripts/help.py 1.0 -p     → 과제 전체 스캔, R·C·G 목록, 첫 DM(최대 3문항)
+    [내가 DM 전송]
+Rn  $sk-clarify-loop + 답변 원문 붙여넣기    → 원문 보존, P 변환, 영향 재스캔, 파생 질문, 판정
+    (판정이 '계속'이면 다음 DM 전송 후 Rn 반복)
+끝  python3 sk/scripts/help.py 1.0 -p 4   → 마감: 남은 G 가정 전환, 구현 기준 요약 → 2.1
+```
+
+- **라운드 0 전체 스캔**: `sk/`·`.git`·`.agents`·의존성 폴더를 뺀 모든 파일을 역할(문서·데이터·테스트·진입점·설정 등)과 읽기 깊이(정독·훑음·제외+사유)로 분류해 `DISCOVERY.md`의 `## 스캔 커버리지`에 남깁니다. 문서·테스트·진입점·미구현 흔적은 반드시 정독합니다.
+- **영향 재스캔**: 답이 오면 새 규칙의 필드명·상태값·경로로 과제 전체를 다시 검색해, 같은 규칙이 적용될 다른 위치와 반대로 기대하는 테스트·문서를 찾습니다.
+- **파생 7점검**: 답변마다 경계(0·등호), 적용 범위, 출력 표현, 집계 영향, 규칙 순서, 예외, 시점을 확인하고 결과가 달라지는 것만 새 질문 후보로 올립니다.
+- **판정**: 계속(질문할 H가 남음) / 확인(H 0개, 재진술 DM 1회) / 종료(→ 2.1) / 차단(제출물·P0 출력 형식 미정). `DM_LOG.md` 맨 위 `## 질의 루프 상태판`에 라운드별 숫자가 쌓입니다.
+- **닫힘 기준**: 열린·질문 중·충돌 H 0개, 모든 P에 조건 → 동작·예시·근거, 문서↔P 충돌 0개, P0 요구마다 기대 출력을 손계산할 수 있음.
+- **예산**: 라운드당 메시지 1개·질문 3개, 질문 라운드 최대 3회 + 확인 1회, 누적 질문 9개. 새 모호성이 모두 M/L이면 질문을 멈추고, 동결 목표(약 10:40)가 지나면 남은 H를 되돌릴 지점이 있는 가정으로 바꿔 닫습니다.
 
 ### 4.1 무엇을 뽑아내나 (1.1 requirements, 1.2 ambiguity)
 
@@ -221,10 +240,10 @@ rm -rf sk
 
 | 자료 | 쓰는 프롬프트 / 스킬 | 상황 |
 | :--- | :--- | :--- |
-| `sk/templates/DM_QUESTION_TEMPLATES.txt` (담당자 질문 양식) | [1.3 dm-questions](../prompts/1-discover/1.3-dm-questions.md) / `$sk-dm-questions` | 모호성 G를 담당자에게 물을 때. 세 패턴(결측·이상치, 규칙 충돌, 정렬·동점)을 실제 상황에 맞게 변형 |
+| `sk/templates/DM_QUESTION_TEMPLATES.txt` (담당자 질문 양식) | [1.0 clarify-loop](../prompts/1-discover/1.0-clarify-loop.md) / `$sk-clarify-loop`, [1.3 dm-questions](../prompts/1-discover/1.3-dm-questions.md) / `$sk-dm-questions` | 모호성 G를 담당자에게 물을 때. 세 패턴(결측·이상치, 규칙 충돌, 정렬·동점)을 실제 상황에 맞게 변형 |
 | `sk/templates/SUBMISSION_DOC_TEMPLATE.md` (계획·의사결정·검증 보고서) | [8.1 report](../prompts/8-submit/8.1-report.md) / `$sk-report` | 제출 보고서 작성. 5개 절을 작업 노트 근거로 채움 |
 | `sk/templates/POST_QA_6_TEMPLATE.md` (6문항 암기 카드) | [9.2 qa-card](../prompts/9-qa/9.2-qa-card.md) / `$sk-qa-card` | 제출 전 Q1~Q6 카드 작성 (AI 허용 시간에만) |
-| `sk/snippets/data_audit.py` (데이터 감사) | [1.2 ambiguity](../prompts/1-discover/1.2-ambiguity.md), [2.2 io-contract](../prompts/2-spec/2.2-io-contract.md), [5.3 data-validation](../prompts/5-verify/5.3-data-validation.md) | CSV·JSON·JSONL 데이터가 있을 때: 결측·음수·중복 수치로 DM 질문 근거 확보, 입력 계약 작성, 결과 검산 전 원본 특성 확인 |
+| `sk/snippets/data_audit.py` (데이터 감사) | [1.0 clarify-loop](../prompts/1-discover/1.0-clarify-loop.md), [1.2 ambiguity](../prompts/1-discover/1.2-ambiguity.md), [2.2 io-contract](../prompts/2-spec/2.2-io-contract.md), [5.3 data-validation](../prompts/5-verify/5.3-data-validation.md) | CSV·JSON·JSONL 데이터가 있을 때: 결측·음수·중복 수치로 DM 질문 근거 확보, 입력 계약 작성, 결과 검산 전 원본 특성 확인 |
 | `sk/snippets/smoke_test.py` (HTTP 도달성 확인) | [5.4 api-contract](../prompts/5-verify/5.4-api-contract.md), [5.5 ui-smoke](../prompts/5-verify/5.5-ui-smoke.md), [8.2 deliver](../prompts/8-submit/8.2-deliver.md) | 서버를 띄운 뒤 응답 여부를 먼저 확인. 상세 계약 검증 전 1차 점검 |
 
 ```bash
@@ -241,8 +260,8 @@ Codex가 단계마다 정해진 파일·섹션에 기록합니다. 대화가 압
 | 파일 | 내용 | 주로 쓰는 단계 |
 | :--- | :--- | :--- |
 | `BRIEF.md` | 환경·실행/테스트 명령·기준선, 과제 유형·전략, 코드 지도 | 0 |
-| `DISCOVERY.md` | 필수 제출물, 요구사항 후보 R, 제약 C, 모호성 G | 1 |
-| `DM_LOG.md` | 보낸 메시지 M#, 답변 원문, 해석, 확정 정책 목록 P | 1 |
+| `DISCOVERY.md` | 필수 제출물, 요구사항 후보 R, 제약 C, 모호성 G, 스캔 커버리지(1.0) | 1 |
+| `DM_LOG.md` | 질의 루프 상태판(1.0), 보낸 메시지 M#, 답변 원문, 해석, 확정 정책 목록 P | 1 |
 | `SPEC.md` | **단일 기준 문서**: 한 장 요약, Top 5 규칙, R·C·P·A·G, 계약, 수용 테스트 표 T, 추적표, 변경 기록, 게이트 | 2 (이후 계속 참조) |
 | `PLAN.md` | 시간 예산, 슬라이스 S, 위험 실험, 축소 결정, 상태 캡슐 | 3·4·6 |
 | `DECISIONS.md` | 설계 결정 DD#, AI 교정 기록 AI# | 3·4·6·7 |
@@ -299,4 +318,4 @@ python3 sk/scripts/install.py
 codex
 ```
 
-Codex에서 `/skills`를 확인하고, 0.1 → 1.1 → 1.3까지만 실행해 DM 초안이 나오는지 봅니다. 끝나면 `python3 sk/scripts/install.py --uninstall`로 정리합니다.
+Codex에서 `/skills`를 확인하고, 0.1 → 1.0(라운드 0)까지만 실행해 스캔 커버리지와 DM 초안이 나오는지 봅니다. 가짜 답변을 한 번 붙여 넣어 상태판과 후속 질문이 갱신되는지도 확인해 보세요. 끝나면 `python3 sk/scripts/install.py --uninstall`로 정리합니다.
