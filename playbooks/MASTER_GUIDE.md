@@ -146,7 +146,7 @@ Rn  $sk-clarify-loop + 답변 원문 붙여넣기    → 원문 보존, P 변환
            제 제안은 A입니다(평균 왜곡 방지). 다른 기준이 있으면 알려주세요.
 ```
 
-템플릿의 세 패턴(결측·이상치 처리, 규칙 충돌 우선순위, 정렬·동점)은 그대로 보내지 않고 실제 과제 상황에 맞게 바꿔 씁니다. 메시지는 Codex가 코드블록으로 만들어 주며 `DM_LOG.md`에 M#으로 기록됩니다.
+템플릿(`python3 sk/scripts/help.py dm`)은 범주별 질문 패턴 14종(P01~P14, 1.2 모호성 범주와 같은 순서), 상황별 메시지 형식 11종(M01 첫 묶음 ~ M11 재진술), 답변 뒤 파생 질문 문구(D1~D7), 과제 유형별 완성 예시(E1~E6), 나쁜 질문 고쳐 쓰기, 보내기 전 체크리스트로 되어 있습니다. Codex는 G의 범주로 패턴을, 상황으로 형식을 고르고 '채울 칸'을 실제 값으로 채웁니다. 패턴 문장을 그대로 보내지 않습니다. 메시지는 Codex가 코드블록으로 만들어 주며 `DM_LOG.md`에 M#으로 기록됩니다.
 
 ### 4.3 답을 기다리는 동안
 
@@ -241,7 +241,7 @@ rm -rf sk
 
 | 자료 | 쓰는 프롬프트 / 스킬 | 상황 |
 | :--- | :--- | :--- |
-| `sk/templates/DM_QUESTION_TEMPLATES.txt` (담당자 질문 양식) | [1.0 clarify-loop](../prompts/1-discover/1.0-clarify-loop.md) / `$sk-clarify-loop`, [1.3 dm-questions](../prompts/1-discover/1.3-dm-questions.md) / `$sk-dm-questions` | 모호성 G를 담당자에게 물을 때. 세 패턴(결측·이상치, 규칙 충돌, 정렬·동점)을 실제 상황에 맞게 변형 |
+| `sk/templates/DM_QUESTION_TEMPLATES.txt` (담당자 질문 양식) | [1.0 clarify-loop](../prompts/1-discover/1.0-clarify-loop.md) / `$sk-clarify-loop`, [1.3 dm-questions](../prompts/1-discover/1.3-dm-questions.md) / `$sk-dm-questions` | 모호성 G를 담당자에게 물을 때. 범주별 패턴 P01~P14와 상황별 형식 M01~M11을 골라 실제 값으로 채우고 체크리스트로 점검. 1.4·1.5도 후속·재진술 형식(M03~M07, M11)을 사용 |
 | `sk/templates/SUBMISSION_DOC_TEMPLATE.md` (계획·의사결정·검증 보고서) | [8.1 report](../prompts/8-submit/8.1-report.md) / `$sk-report` | 제출 보고서 작성. 5개 절을 작업 노트 근거로 채움 |
 | `sk/templates/POST_QA_6_TEMPLATE.md` (6문항 암기 카드) | [9.2 qa-card](../prompts/9-qa/9.2-qa-card.md) / `$sk-qa-card` | 제출 전 Q1~Q6 카드 작성 (AI 허용 시간에만) |
 | `sk/snippets/data_audit.py` (데이터 감사) | [1.0 clarify-loop](../prompts/1-discover/1.0-clarify-loop.md), [1.2 ambiguity](../prompts/1-discover/1.2-ambiguity.md), [2.2 io-contract](../prompts/2-spec/2.2-io-contract.md), [5.3 data-validation](../prompts/5-verify/5.3-data-validation.md) | CSV·JSON·JSONL 데이터가 있을 때: 결측·음수·중복 수치로 DM 질문 근거 확보, 입력 계약 작성, 결과 검산 전 원본 특성 확인 |
