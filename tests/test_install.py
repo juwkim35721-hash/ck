@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -27,7 +28,7 @@ class InstallerTests(unittest.TestCase):
         (self.workspace / "README.md").write_text("private task\n")
 
     def install(self, *args, expected=0):
-        result = subprocess.run(["bash", str(ROOT / "init.sh"), "--kit", str(self.kit), *args],
+        result = subprocess.run([sys.executable, str(ROOT / "scripts/install.py"), "--kit", str(self.kit), *args],
                                 env=self.env, cwd=self.base, text=True, capture_output=True)
         self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
         return result
@@ -45,13 +46,17 @@ class InstallerTests(unittest.TestCase):
         self.assertIn((ROOT / "harness/AGENTS.md").read_bytes(), (self.workspace / "AGENTS.md").read_bytes())
         self.assertEqual((self.kit / "workspace.txt").read_text().strip(), str(self.workspace))
         manifest = json.loads((self.kit / "installation.json").read_text())
-        self.assertEqual(manifest["skill_count"], 24)
+        self.assertEqual(manifest["skill_count"], 18)
+        self.assertTrue((self.kit / "skill").is_dir())
+        self.assertFalse((self.kit / "init.sh").exists())
+        self.assertFalse((self.kit / "skills").exists())
+        self.assertFalse((self.kit / "custom-skills").exists())
         for target in (".agents", ".codex"):
-            for skill_root in ("skills", "custom-skills"):
-                for skill in (ROOT / skill_root).iterdir():
-                    if skill.is_dir():
-                        self.assertEqual((self.home / target / "skills" / skill.name / "SKILL.md").read_bytes(),
-                                         (skill / "SKILL.md").read_bytes())
+            for skill in (ROOT / "skill").iterdir():
+                if skill.is_dir():
+                    self.assertEqual((self.home / target / "skills" / skill.name / "SKILL.md").read_bytes(),
+                                     (skill / "SKILL.md").read_bytes())
+            self.assertFalse(any((self.home / target / "skills").glob("cofa-*")))
         self.install("--check")
 
     def test_backup_and_repeat_install_preserve_unrelated_skill(self):
@@ -145,10 +150,56 @@ class InstallerTests(unittest.TestCase):
 
     def test_custom_kit_environment_is_supported(self):
         self.env["COFA_KIT_DIR"] = str(self.kit)
-        result = subprocess.run(["bash", str(ROOT / "init.sh"), "--workspace", str(self.workspace)],
+        result = subprocess.run([sys.executable, str(ROOT / "scripts/install.py"), "--workspace", str(self.workspace)],
                                 env=self.env, cwd=self.base, text=True, capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("sk-context", self.helper("list").stdout)
+
+    def legacy_skill(self, target=".agents", suffix=b""):
+        path = self.home / target / "skills/cofa-eda/SKILL.md"
+        path.parent.mkdir(parents=True)
+        path.write_bytes((ROOT / "tests/fixtures/legacy-cofa-eda.txt").read_bytes() + suffix)
+        return path
+
+    def test_legacy_migration_backs_up_verified_originals_only(self):
+        paths = [self.legacy_skill(target) for target in (".agents", ".codex")]
+        originals = [path.read_bytes() for path in paths]
+        self.install("--workspace", str(self.workspace), "--migrate-legacy")
+        manifest = json.loads((self.kit / "installation.json").read_text())
+        self.assertEqual(set(manifest["retired_legacy"]), {str(path) for path in paths})
+        for path, original in zip(paths, originals):
+            self.assertFalse(path.parent.exists())
+            backup = next(b for b in manifest["backups"] if b["original"] == str(path))
+            self.assertEqual(Path(backup["backup"]).read_bytes(), original)
+        self.install("--check")
+
+    def test_legacy_migration_keeps_modified_skills_and_extra_resources(self):
+        modified = self.legacy_skill(".agents", b"\nuser modifications\n")
+        extra = self.legacy_skill(".codex")
+        (extra.parent / "user-notes.txt").write_text("keep user notes\n")
+        self.install("--migrate-legacy")
+        self.assertTrue(modified.read_bytes().endswith(b"user modifications\n"))
+        self.assertTrue(extra.is_file())
+        self.assertEqual((extra.parent / "user-notes.txt").read_text(), "keep user notes\n")
+        manifest = json.loads((self.kit / "installation.json").read_text())
+        self.assertEqual(manifest["retired_legacy"], [])
+        self.assertEqual(len(manifest["retained_legacy"]), 2)
+
+    def test_legacy_skills_are_kept_without_explicit_migration_option(self):
+        old = self.legacy_skill()
+        self.install()
+        self.assertTrue(old.is_file())
+        manifest = json.loads((self.kit / "installation.json").read_text())
+        self.assertEqual(manifest["retired_legacy"], [])
+        self.assertIn(str(old.parent), manifest["retained_legacy"])
+
+    def test_legacy_migration_dry_run_has_no_writes(self):
+        old = self.legacy_skill()
+        content = old.read_bytes()
+        result = self.install("--workspace", str(self.workspace), "--migrate-legacy", "--dry-run")
+        self.assertIn("원본 확인된 이전 스킬 백업 후 정리", result.stdout)
+        self.assertEqual(old.read_bytes(), content)
+        self.assertFalse(self.kit.exists())
 
 
 if __name__ == "__main__":

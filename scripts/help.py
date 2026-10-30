@@ -38,7 +38,7 @@ def main() -> int:
     if args.topic == "workspace":
         marker = root / "workspace.txt"
         text = marker.read_text(encoding="utf-8").strip() if marker.is_file() else ""
-        print(text or "과제 루트 미지정. init.sh --workspace <실제 과제 루트>로 하네스를 설치하세요.")
+        print(text or "과제 루트 미지정. python3 ~/sk/scripts/install.py --workspace <실제 과제 루트>로 하네스를 설치하세요.")
         return 0
     if args.topic in special:
         path = root / special[args.topic]

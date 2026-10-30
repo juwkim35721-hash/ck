@@ -8,7 +8,7 @@
 
 모델·Codex 명령·시험 시각·감독 절차·공개 자료 활용 범위는 당일 공식 안내로 확인합니다. 이 저장소에는 공식 메일 원문이 없습니다. 허용하지 않은 도구를 설치하거나 버전을 업데이트해 문제를 해결하지 마세요.
 
-기존 `skills/`, `snippets/`, `templates/`는 원본을 보존했습니다. 신규 절차에는 `custom-skills/`의 **`sk-*`**를 우선 사용하고, 기존 `cofa-*`는 필요한 경우만 사용합니다. 신규 스킬을 추가하기 위해 기존 스킬 파일을 수정하지 않았습니다.
+모든 스킬은 저장소의 **`skill/` 한 폴더**에서 관리하고 호출 이름도 **`sk-*`**로 통일합니다. 이전 `cofa-*` 6개는 대응하는 세부 스킬에 병합했으며, 별도 중복 스킬로 설치하지 않습니다. `snippets/`, `templates/`는 원본을 유지합니다. 설치 위치인 `~/.agents/skills`, `~/.codex/skills`의 복수형은 Codex 검색 경로이므로 그대로 사용합니다.
 
 ## 2. 터미널별 시작 절차
 
@@ -18,7 +18,7 @@
 
 ```bash
 cd ~ && git clone https://github.com/juwkim35721/sk sk
-bash ~/sk/init.sh --workspace "$HOME/workspace"
+python3 ~/sk/scripts/install.py --workspace "$HOME/workspace"
 ```
 
 두 번째 줄의 `--workspace`는 실제 과제 경로로 바꿉니다. 존재하지 않는 폴더는 설치가 거절됩니다. `sk`가 이미 있으면 지우지 말고 먼저 저장소를 확인하세요.
@@ -32,13 +32,35 @@ git -C ~/sk remote -v
 설치 계획과 설치 후 파일 상태를 확인하는 명령은 다릅니다.
 
 ```bash
-bash ~/sk/init.sh --workspace "$HOME/workspace" --dry-run
-bash ~/sk/init.sh --check
+python3 ~/sk/scripts/install.py --workspace "$HOME/workspace" --dry-run
+python3 ~/sk/scripts/install.py --check
 bash /tmp/cofa-kit/help.sh workspace
 bash /tmp/cofa-kit/help.sh list
 ```
 
 `--dry-run`은 쓰기 없이 계획만 출력합니다. `--check`는 설치 기록의 해시를 비교하는 **검사 전용** 옵션입니다. 실제 Codex 인식·과제 동작까지 확인하는 명령은 아닙니다.
+
+### 이전 버전의 중복 스킬 통합
+
+저장소에는 `skill/` 아래 18개 `sk-*`만 남깁니다. 이전 스킬의 역할은 아래처럼 연결하고, 이미 포함된 절차는 반복하지 않습니다.
+
+| 이전 스킬 | 통합 대상 |
+| :--- | :--- |
+| `cofa-start` | `sk-context`, `sk-define`, `sk-clarify`, `sk-plan` — 과제 유형·완료 기준·정책 질문·계획 |
+| `cofa-eda` | `sk-data-contract`, `sk-data-validation` — 데이터 계약·실제 감사·독립 검산 |
+| `cofa-design` | `sk-design`, `sk-implement` — 대안 비교와 구현 책임 분리 |
+| `cofa-edge` | `sk-harden` — 관련 예외·경계·불변식 방어 |
+| `cofa-verify` | `sk-verify` — 정상·예외 테스트와 변경 파일 검증 |
+| `cofa-brief` | `sk-deliver`, `sk-retrospect` — 제출 문서와 사실 기반 설명·회고 분리 |
+
+이전 버전을 이미 설치했다면 재설치만으로 기존 `cofa-*`가 자동 삭제되지는 않습니다. 해당 스킬까지 정리하려면 다음을 사용합니다. **배포했던 원본과 해시가 같고 추가 자료가 없는 이전 스킬만 백업 후 제거**하며, 사용자 수정본·추가 파일·심볼릭 링크는 보존하고 경로를 표시합니다.
+
+```bash
+python3 ~/sk/scripts/install.py --workspace "$HOME/workspace" --migrate-legacy --dry-run
+python3 ~/sk/scripts/install.py --workspace "$HOME/workspace" --migrate-legacy
+```
+
+일반 새 설치에는 `--migrate-legacy`가 필요 없습니다. 수정되어 보존된 이전 스킬은 내용을 비교해 필요한 부분을 직접 통합한 뒤 정리하세요. 무관한 사용자 스킬은 이 옵션의 대상이 아닙니다. 예전 키트 내부의 `skills/`·`custom-skills/` 복사본은 자동 삭제하지 않지만 새 설치 경로나 스킬 검색 대상으로 사용하지 않습니다.
 
 ### 터미널 1 — 실제 과제 루트에서 Codex 실행
 
@@ -144,7 +166,7 @@ CLI는 GET 하나의 상태·응답 일부·지연을 출력하고 실패를 종
 
 | 증상 | 대응 |
 | :--- | :--- |
-| `sk` 폴더가 이미 있음 | `git -C ~/sk remote -v`로 지정 저장소인지 확인하고 맞으면 기존 `init.sh`를 사용합니다. 관련 없는 폴더는 삭제하지 않습니다. |
+| `sk` 폴더가 이미 있음 | `git -C ~/sk remote -v`로 지정 저장소인지 확인하고 맞으면 `python3 ~/sk/scripts/install.py`를 실행합니다. 관련 없는 폴더는 삭제하지 않습니다. |
 | 실제 과제 폴더가 없다는 오류 | 시험 화면과 `pwd`로 경로를 확인합니다. 빈 폴더를 만들어 과제라고 가정하지 않습니다. |
 | 심볼릭 링크 경로 거절 | 설치 대상과 상위 경로를 확인하고 일반 폴더의 안전한 위치를 지정합니다. 링크를 자동 제거하지 않습니다. |
 | `/tmp/cofa-kit`가 사라짐 | 임시 공간이 지워진 것일 수 있습니다. 클론 저장소에서 재설치하고 Codex 인식을 다시 확인합니다. |

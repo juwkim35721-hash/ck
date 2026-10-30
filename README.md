@@ -2,11 +2,11 @@
 
 [juwkim35721/sk](https://github.com/juwkim35721/sk)는 과제를 **정확히 정의하고, 작은 단위로 구현하고, 실제 증거로 검증하는 과정**을 돕는 공개 준비 도구입니다. 완성된 과제 정답이나 대회 공식 안내를 제공하지 않습니다. 공식 규정과 AI 사용 허용 범위를 확인한 뒤 사용하세요.
 
-**기존 `skills/`, `snippets/`, `templates/`의 11개 파일은 그대로 보존했습니다.** 더 세분화된 신규 스킬 18개는 `custom-skills/`에 분리했고, 사람에게 바로 쓸모 있는 기본·심화 프롬프트 36개는 `prompts/`의 단계별 Markdown 18개에 담았습니다.
+**스킬은 `skill/` 하나에 18개로 통합했습니다.** 기존 `cofa-*` 6개와 세분화한 `sk-*`의 겹치는 역할은 병합하고, 기본·심화 전략 프롬프트 36개는 `prompts/`의 단계별 Markdown 18개로 제공합니다. `snippets/`, `templates/`의 원본 5개 파일은 그대로 유지합니다.
 
 ## 빠른 시작
 
-Python **3.10 이상**, Bash가 필요합니다. 클론할 때만 Git·네트워크가 필요하며, 새 `init.sh`는 저장소의 로컬 파일만 설치합니다. Codex나 외부 스킬 저장소를 다운로드·업데이트하지 않습니다.
+Python **3.10 이상**, Bash가 필요합니다. 클론할 때만 Git·네트워크가 필요하며, `scripts/install.py`를 Python으로 직접 실행하며 저장소의 로컬 파일만 설치합니다. Codex나 외부 스킬 저장소를 다운로드·업데이트하지 않습니다.
 
 일반 터미널에서 홈 디렉토리 아래 **`sk`**에 클론합니다.
 
@@ -17,7 +17,7 @@ cd ~ && git clone https://github.com/juwkim35721/sk sk
 실제 과제 폴더가 `~/workspace`인 경우 다음을 실행합니다. 다른 경로이면 `--workspace` 값을 바꾸세요. 폴더는 이미 존재해야 합니다.
 
 ```bash
-bash ~/sk/init.sh --workspace "$HOME/workspace"
+python3 ~/sk/scripts/install.py --workspace "$HOME/workspace"
 ```
 
 그다음 **실제 과제 루트에서** Codex를 실행합니다. `~/sk`는 준비 도구 저장소이므로 과제 작업 위치로 사용하지 않습니다.
@@ -31,8 +31,8 @@ cd ~/workspace && codex
 설치 전 계획만 확인하려면 `--dry-run`, 설치 기록을 검사만 하려면 `--check`를 사용합니다.
 
 ```bash
-bash ~/sk/init.sh --workspace "$HOME/workspace" --dry-run
-bash ~/sk/init.sh --check
+python3 ~/sk/scripts/install.py --workspace "$HOME/workspace" --dry-run
+python3 ~/sk/scripts/install.py --check
 ```
 
 `--workspace`를 생략하면 스킬·키트만 설치하고 프로젝트 `AGENTS.md`는 설치하지 않습니다. 개인 연습 환경의 기존 설정도 설치 전에 확인하세요.
@@ -61,14 +61,13 @@ bash /tmp/cofa-kit/help.sh --search 경계
 ```text
 sk/
 ├── README.md
-├── init.sh                         # 로컬 설치 진입점
 ├── harness/
 │   ├── AGENTS.md                   # 새 프로젝트 하네스
 │   ├── stages.json                 # 단계·프롬프트·스킬 대응 목록
-│   └── preserved-files.json        # 기존 11개 파일의 보존 해시
+│   ├── legacy-skills.json          # 이전 스킬 병합·안전 이전 정보
+│   └── preserved-files.json        # 스니펫·템플릿 5개 파일의 보존 해시
 ├── prompts/                        # 단계별 Markdown 18개 + 사용 안내
-├── custom-skills/                  # 새 맞춤형 스킬 18개
-├── skills/                         # 기존 cofa-* 스킬 6개, 원본 보존
+├── skill/                          # 중복을 통합한 sk-* 스킬 18개
 ├── snippets/                       # 기존 진단 코드 2개, 원본 보존
 ├── templates/                      # 기존 양식 3개, 원본 보존
 ├── playbooks/
@@ -77,7 +76,9 @@ sk/
 └── tests/                          # 설치·백업·도움말 통합 테스트
 ```
 
-신규 `sk-*`와 기존 `cofa-*` 스킬은 이름이 달라 공존합니다. 기본 설치는 양쪽 스킬을 모두 `~/.agents/skills`와 `~/.codex/skills`에 복사합니다. 기존 스킬의 고정 경로·광범위한 설명은 보존되어 있으므로 **새 흐름에는 `sk-*`를 우선 사용**하세요.
+스킬 호출 이름은 **`sk-*`로 통일**합니다. 저장소에서는 `skill/` 한 폴더를 사용하며 Codex가 검색하는 설치 위치는 `~/.agents/skills`와 `~/.codex/skills`입니다. 두 설치 경로의 `skills` 이름은 도구 규약이므로 변경하지 않습니다. 이전 `cofa-*` 역할의 병합 대상과 안전한 정리 방법은 MASTER_GUIDE에 정리했습니다.
+
+이전 버전에서 설치한 중복 스킬을 정리하려면 `python3 ~/sk/scripts/install.py --workspace "$HOME/workspace" --migrate-legacy`를 사용합니다. 알려진 원본과 일치하고 추가 파일이 없는 `cofa-*`만 백업 후 정리하며, 수정본·추가 자료·무관한 스킬은 보존합니다. 먼저 `--dry-run`으로 확인할 수 있습니다. 과거 키트의 구 폴더 복사본은 검색 대상으로 쓰지 않으며 자동 삭제하지 않습니다.
 
 ## 설치가 바꾸는 것과 바꾸지 않는 것
 
@@ -85,7 +86,7 @@ sk/
 
 ```bash
 export COFA_KIT_DIR="$HOME/.local/share/sk-kit"
-bash ~/sk/init.sh --workspace "$HOME/workspace"
+python3 ~/sk/scripts/install.py --workspace "$HOME/workspace"
 bash "$COFA_KIT_DIR/help.sh" list
 ```
 

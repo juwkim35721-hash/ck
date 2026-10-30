@@ -13,7 +13,7 @@ import sys
 from datetime import datetime, timezone
 
 ROOT = Path(__file__).resolve().parent.parent
-COPY_DIRS = ("harness", "skills", "custom-skills", "prompts", "snippets", "templates", "playbooks", "scripts")
+COPY_DIRS = ("harness", "skill", "prompts", "snippets", "templates", "playbooks", "scripts")
 
 
 def digest(path: Path) -> str:
@@ -50,7 +50,7 @@ def project_harness(existing: bytes, payload: bytes) -> bytes:
 
 
 def source_files() -> list[Path]:
-    files = [ROOT / "README.md", ROOT / "init.sh"]
+    files = [ROOT / "README.md"]
     for directory in COPY_DIRS:
         base = ROOT / directory
         if not base.is_dir():
@@ -88,13 +88,14 @@ def main() -> int:
     parser.add_argument("--kit", default=os.environ.get("COFA_KIT_DIR", "/tmp/cofa-kit"), help="설치 키트 위치")
     parser.add_argument("--dry-run", action="store_true", help="설치 계획만 출력하고 파일을 변경하지 않음")
     parser.add_argument("--check", action="store_true", help="기존 설치 파일 검사만 수행. 설치·덮어쓰기 없음")
+    parser.add_argument("--migrate-legacy", action="store_true", help="이전 cofa-* 원본 스킬만 백업 후 정리. 수정본·추가 자료는 보존")
     args = parser.parse_args()
     raw_kit = Path(args.kit).expanduser().absolute()
     reject_symlinks(raw_kit)
     kit = raw_kit.resolve()
     if args.check:
-        if args.dry_run or args.workspace:
-            parser.error("--check는 --workspace/--dry-run과 함께 사용하지 않습니다")
+        if args.dry_run or args.workspace or args.migrate_legacy:
+            parser.error("--check는 --workspace/--dry-run/--migrate-legacy와 함께 사용하지 않습니다")
         return check_install(kit)
 
     workspace = None
@@ -119,17 +120,16 @@ def main() -> int:
     # 설치 도움말은 키트 루트에서도 실행할 수 있도록 별도 진입점을 둔다.
     plans.append((ROOT / "scripts/help.sh", kit / "help.sh", "kit/help.sh"))
     skill_count = 0
-    for folder in ("skills", "custom-skills"):
-        for skill in sorted((ROOT / folder).iterdir()):
-            if not skill.is_dir() or not (skill / "SKILL.md").is_file():
-                continue
-            skill_count += 1
-            for source in sorted(p for p in skill.rglob("*") if p.is_file()):
-                relative = source.relative_to(skill)
-                for target in (".agents", ".codex"):
-                    destination = home / target / "skills" / skill.name / relative
-                    label = f"{target}/skills/{skill.name}/{relative.as_posix()}"
-                    plans.append((source, destination, label))
+    for skill in sorted((ROOT / "skill").iterdir()):
+        if not skill.is_dir() or not (skill / "SKILL.md").is_file():
+            continue
+        skill_count += 1
+        for source in sorted(p for p in skill.rglob("*") if p.is_file() and "__pycache__" not in p.parts):
+            relative = source.relative_to(skill)
+            for target in (".agents", ".codex"):
+                destination = home / target / "skills" / skill.name / relative
+                label = f"{target}/skills/{skill.name}/{relative.as_posix()}"
+                plans.append((source, destination, label))
     if workspace:
         plans.append((ROOT / "harness/AGENTS.md", workspace / "AGENTS.md", "workspace/AGENTS.md"))
         if is_within(ROOT, workspace):
@@ -149,11 +149,37 @@ def main() -> int:
         project_path = workspace / "AGENTS.md"
         existing = project_path.read_bytes() if project_path.is_file() else b""
         merged_project = project_harness(existing, (ROOT / "harness/AGENTS.md").read_bytes())
+    legacy = json.loads((ROOT / "harness/legacy-skills.json").read_text(encoding="utf-8"))
+    retirements: list[tuple[Path, str]] = []
+    legacy_kept: list[str] = []
+    for name, specification in legacy.items():
+        for target in (".agents", ".codex"):
+            folder = home / target / "skills" / name
+            if not folder.exists() and not folder.is_symlink():
+                continue
+            path = folder / "SKILL.md"
+            if not args.migrate_legacy:
+                legacy_kept.append(str(folder))
+                continue
+            try:
+                reject_symlinks(path)
+            except ValueError:
+                legacy_kept.append(str(folder))
+                continue
+            if (folder.is_dir() and list(folder.iterdir()) == [path] and path.is_file()
+                    and digest(path) == specification["sha256"]):
+                retirements.append((path, f"retired/{target}/skills/{name}/SKILL.md"))
+            else:
+                legacy_kept.append(str(folder))
     print(f"원본: {ROOT}\n키트: {kit}\n과제 루트: {workspace or '미지정(프로젝트 하네스 미설치)'}")
     print(f"스킬 {skill_count}개 × 검색 경로 2곳, 계획 파일 {len(plans)}개")
+    for folder in legacy_kept:
+        print(f"이전 스킬 보존: {folder} (미선택·수정본·추가 자료·링크는 자동 삭제하지 않음)")
     if args.dry_run:
         for _, destination, _ in plans:
             print(f"계획: {destination}")
+        for path, _ in retirements:
+            print(f"계획: 원본 확인된 이전 스킬 백업 후 정리 {path}")
         print("dry-run 완료: 파일을 변경하지 않았습니다")
         return 0
 
@@ -190,11 +216,21 @@ def main() -> int:
     records.append({"path": str(workspace_file), "sha256": digest(workspace_file)})
     manifest_path = kit / "installation.json"
     backup(manifest_path, "kit/installation.json")
+    for path, label in retirements:
+        # 설치 계획 이후 파일이 바뀌었다면 제거하지 않는다.
+        if path.is_symlink() or not path.is_file() or digest(path) != legacy[path.parent.name]["sha256"]:
+            raise ValueError(f"이전 스킬이 설치 중 변경되었습니다. 자동 정리 중단: {path}")
+        backup(path, label)
+        path.unlink()
+        path.parent.rmdir()
     manifest = {"format_version": 1, "source": str(ROOT), "kit": str(kit),
                 "workspace": str(workspace) if workspace else None, "installed_at_utc": stamp,
-                "skill_count": skill_count, "files": records, "backups": backups}
+                "skill_count": skill_count, "files": records, "backups": backups,
+                "retired_legacy": [str(path) for path, _ in retirements], "retained_legacy": legacy_kept}
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"설치 완료: 변경/신규 {changed}개, 기존 파일 백업 {len(backups)}개")
+    if retirements:
+        print(f"원본 확인된 이전 중복 스킬 {len(retirements)}개 백업·정리 완료")
     if backups:
         print(f"백업: {backup_root}\n백업 파일은 삭제하지 않았습니다. 복구 방법은 MASTER_GUIDE를 확인하세요.")
     print(f"도움말: bash {shlex.quote(str(kit / 'help.sh'))} list")
@@ -203,6 +239,9 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    if sys.version_info < (3, 10):
+        print("Python 3.10 이상이 필요합니다. 허용 없이 환경을 업데이트하지 마세요.", file=sys.stderr)
+        raise SystemExit(1)
     try:
         raise SystemExit(main())
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:

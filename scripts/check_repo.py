@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 def main() -> int:
     errors = []
     preserved = json.loads((ROOT / "harness/preserved-files.json").read_text(encoding="utf-8"))
-    actual = {str(p.relative_to(ROOT)) for name in ("skills", "snippets", "templates")
+    actual = {str(p.relative_to(ROOT)) for name in ("snippets", "templates")
               for p in (ROOT / name).rglob("*") if p.is_file() and "__pycache__" not in p.parts}
     if actual != set(preserved):
         errors.append(f"보존 폴더 파일 목록 변경: 추가={sorted(actual-set(preserved))}, 누락={sorted(set(preserved)-actual)}")
@@ -24,9 +24,16 @@ def main() -> int:
     stages = json.loads((ROOT / "harness/stages.json").read_text(encoding="utf-8"))
     if len({s["id"] for s in stages}) != len(stages) or len({s["skill"] for s in stages}) != len(stages):
         errors.append("중복 단계 ID 또는 스킬명")
+    expected_skills = {s["skill"] for s in stages}
+    actual_skills = {p.name for p in (ROOT / "skill").iterdir() if p.is_dir()}
+    if expected_skills != actual_skills:
+        errors.append("단일 skill/ 폴더와 단계 목록의 스킬이 일치하지 않습니다")
+    for obsolete in ("init.sh", "skills", "custom-skills"):
+        if (ROOT / obsolete).exists():
+            errors.append(f"통합 전 구조가 남아 있습니다: {obsolete}")
     for stage in stages:
         prompt = ROOT / "prompts" / (stage["id"] + ".md")
-        skill = ROOT / "custom-skills" / stage["skill"] / "SKILL.md"
+        skill = ROOT / "skill" / stage["skill"] / "SKILL.md"
         for path in (prompt, skill):
             if not path.is_file():
                 errors.append(f"단계 파일 누락: {path.relative_to(ROOT)}")
@@ -36,7 +43,7 @@ def main() -> int:
             errors.append(f"기본/심화 프롬프트 부족: {prompt.relative_to(ROOT)}")
     files = [ROOT / "README.md", ROOT / "playbooks/MASTER_GUIDE.md", ROOT / "prompts/README.md"]
     files.extend(sorted((ROOT / "prompts").glob("*.md")))
-    files.extend(sorted((ROOT / "custom-skills").glob("*/SKILL.md")))
+    files.extend(sorted((ROOT / "skill").glob("*/SKILL.md")))
     files.append(ROOT / "harness/AGENTS.md")
     for path in dict.fromkeys(files):
         if not path.is_file():
@@ -57,7 +64,7 @@ def main() -> int:
             result = subprocess.run(["bash", "-n"], input=block, text=True, capture_output=True)
             if result.returncode:
                 errors.append(f"문서 Bash 문법: {path.relative_to(ROOT)}: {result.stderr.strip()}")
-    for path in (ROOT / "init.sh", ROOT / "scripts/help.sh"):
+    for path in (ROOT / "scripts/help.sh",):
         result = subprocess.run(["bash", "-n", str(path)], capture_output=True, text=True)
         if result.returncode:
             errors.append(f"셸 문법: {path.relative_to(ROOT)}: {result.stderr.strip()}")
