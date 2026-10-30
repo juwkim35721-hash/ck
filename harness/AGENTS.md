@@ -21,7 +21,7 @@
 | 1 발굴·담당자 DM | `$sk-clarify-loop`(스캔·질문·답변 반영을 라운드로 반복, 권장) 또는 `$sk-requirements` → `$sk-ambiguity` → `$sk-dm-questions` → (사용자가 DM 전송·답변 붙여넣기) → `$sk-dm-log` → `$sk-dm-confirm` |
 | 2 명세 | `$sk-spec` → `$sk-data-contract` → `$sk-acceptance` → `$sk-spec-gate` |
 | 3 계획·설계 | `$sk-plan` → `$sk-design`, 수시로 `$sk-decision-log` |
-| 4 구현 루프 | 슬라이스마다 `$sk-test-first` → `$sk-implement` → `$sk-harden` → `$sk-verify` / `$sk-evidence` |
+| 4 구현 루프 | `$sk-build-loop`(슬라이스 하나를 착수 점검→RED→GREEN→방어→검증까지 한 바퀴, 권장) 또는 슬라이스마다 `$sk-test-first` → `$sk-implement` → `$sk-harden` → `$sk-verify` / `$sk-evidence` |
 | 5 검증 특화 | `$sk-data-validation`, `$sk-api-contract`, `$sk-ui-smoke` |
 | 6 막힐 때 | `$sk-debug`, `$sk-unstuck`, `$sk-rollback`, `$sk-resume`, `$sk-timebox` |
 | 7 리뷰 | `$sk-review` → `$sk-compliance` |

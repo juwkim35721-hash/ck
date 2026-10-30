@@ -33,7 +33,7 @@ codex
 | `1-discover` | 요구사항 발굴·담당자 DM | **1.0 clarify-loop**(스캔·질문·후속 질문 반복) · 1.1 requirements · 1.2 ambiguity · 1.3 dm-questions · 1.4 dm-answers · 1.5 dm-confirm |
 | `2-spec` | 구현 전 명세 정리·동결 | 2.1 spec · 2.2 io-contract · 2.3 acceptance · 2.4 spec-gate |
 | `3-plan` | 계획·설계 | 3.1 plan · 3.2 design · 3.3 decision-log |
-| `4-build` | 구현 | 4.1 test-first · 4.2 implement · 4.3 harden |
+| `4-build` | 구현 | **4.0 build-loop**(슬라이스 하나를 착수 점검→RED→GREEN→방어→검증까지 한 번에) · 4.1 test-first · 4.2 implement · 4.3 harden |
 | `5-verify` | 검증·증거 | 5.1 verify · 5.2 evidence · 5.3 data-validation · 5.4 api-contract · 5.5 ui-smoke |
 | `6-debug` | 디버깅·복구·시간 관리 | 6.1 debug · 6.2 unstuck · 6.3 rollback · 6.4 resume · 6.5 timebox |
 | `7-review` | 리뷰·준수 감사 | 7.1 review · 7.2 compliance |

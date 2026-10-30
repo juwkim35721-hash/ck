@@ -34,7 +34,8 @@ FLOW = """권장 진행 순서 (상세: sk/playbooks/MASTER_GUIDE.md)
               또는 1.1 requirements → 1.2 ambiguity → 1.3 dm-questions → (DM 전송·답변) → 1.4 dm-answers → 1.5 dm-confirm
   2 명세      2.1 spec → 2.2 io-contract → 2.3 acceptance → 2.4 spec-gate   ← READY 전에는 구현하지 않음
   3 계획      3.1 plan → 3.2 design   (3.3 decision-log는 수시로)
-  4 구현 루프  슬라이스마다 4.1 test-first → 4.2 implement → 4.3 harden → 5.1 verify / 5.2 evidence
+  4 구현 루프  슬라이스마다 4.0 build-loop (권장: 착수 점검 → RED → GREEN → 방어 → 검증 한 바퀴)
+              또는 4.1 test-first → 4.2 implement → 4.3 harden → 5.1 verify / 5.2 evidence
   5 검증 특화  5.3 data-validation · 5.4 api-contract · 5.5 ui-smoke
   6 막힐 때    6.1 debug · 6.2 unstuck · 6.3 rollback · 6.4 resume · 6.5 timebox
   7 리뷰      7.1 review → 7.2 compliance

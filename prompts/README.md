@@ -23,7 +23,8 @@ python3 sk/scripts/help.py flow       # 권장 순서
             또는 1.1 → 1.2 → 1.3 → (내가 DM 전송, 답변 붙여넣기) → 1.4 → 1.5
 2 명세      2.1 → 2.2 → 2.3 → 2.4        ← READY 전에는 구현하지 않음
 3 계획      3.1 → 3.2   (3.3은 결정이 생길 때마다)
-4·5 구현    슬라이스마다 4.1 → 4.2 → 4.3 → 5.1 / 5.2  (+ 5.3 데이터 · 5.4 API · 5.5 UI)
+4·5 구현    슬라이스마다 4.0 (권장: 착수 점검 → RED → GREEN → 방어 → 검증을 한 바퀴로)
+            또는 4.1 → 4.2 → 4.3 → 5.1 / 5.2  (+ 5.3 데이터 · 5.4 API · 5.5 UI)
 6 막힐 때    6.1 debug · 6.2 unstuck · 6.3 rollback · 6.4 resume · 6.5 timebox
 7 리뷰      7.1 → 7.2
 마무리      9.1 → 9.4 → 8.1 → 9.2 → 8.2 → 9.3   (6문항 대비는 제출 전 AI 허용 시간에만)
@@ -75,10 +76,11 @@ python3 sk/scripts/help.py flow       # 권장 순서
 
 ## `4-build` — 구현
 
-수용 테스트를 먼저 세우고, 슬라이스 하나씩 최소 변경으로 구현한 뒤 관련 엣지 케이스를 방어한다.
+수용 테스트를 먼저 세우고, 슬라이스 하나씩 최소 변경으로 구현한 뒤 관련 엣지 케이스를 방어한다. 4.0 구현 루프는 이 과정과 5단계 검증을 슬라이스 단위 한 바퀴로 묶는다.
 
 | ID | 프롬프트 | 스킬 | 작업 노트 | 사용 자료 |
 | :--- | :--- | :--- | :--- | :--- |
+| 4.0 | [구현 루프 — 슬라이스 하나를 RED→GREEN→방어→검증까지](4-build/4.0-build-loop.md) | `$sk-build-loop` | `PLAN.md`, `EVIDENCE.md`, `SPEC.md` | `sk/snippets/data_audit.py`, `sk/snippets/smoke_test.py` |
 | 4.1 | [실패하는 수용 테스트 먼저 작성](4-build/4.1-test-first.md) | `$sk-test-first` | `SPEC.md`, `EVIDENCE.md` | — |
 | 4.2 | [슬라이스 하나 최소 변경 구현](4-build/4.2-implement.md) | `$sk-implement` | `PLAN.md`, `SPEC.md`, `DECISIONS.md` | — |
 | 4.3 | [관련 엣지 케이스 방어](4-build/4.3-harden.md) | `$sk-harden` | `SPEC.md`, `EVIDENCE.md` | — |

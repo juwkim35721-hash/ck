@@ -19,7 +19,7 @@ description: "최소 설계·대안 비교: 구현 전 인터페이스를 보존
 - 새 기능의 경계, 기존 인터페이스 보존, 오류 처리 위치, 호출자 영향이 불명확할 때 사용한다.
 - 구현 중 설계 선택이 바뀌면 → `3.3 decision-log ($sk-decision-log)`으로 짧게 기록하고 필요 시 이 스킬로 돌아온다.
 - SPEC에 P0·AC·T가 없거나 입출력 계약이 비면 → `2.1 spec ($sk-spec)`, `2.2 io-contract ($sk-data-contract)`, `2.3 acceptance ($sk-acceptance)`을 먼저 쓴다.
-- 단순히 정해진 S#을 코딩하는 일은 → `4.1 test-first ($sk-test-first)`와 `4.2 implement ($sk-implement)`의 책임이다.
+- 단순히 정해진 S#을 코딩하는 일은 → `4.0 build-loop ($sk-build-loop)` 또는 `4.1 test-first ($sk-test-first)`와 `4.2 implement ($sk-implement)`의 책임이다.
 - 광범위한 재설계, 신규 프레임워크 도입, 새 패키지 설치는 이 해커톤의 최소 설계 범위가 아니다.
 
 ## 입력과 사전 확인
@@ -58,14 +58,14 @@ git diff --stat
 10. Guard는 입력 경계에 두고, 근거 없는 업무 정책은 넣지 않는다. 새 정책 필요 시 G#로 등록한다.
 11. 영향을 받는 호출자와 기존 테스트를 열거하고, 호환이 깨질 가능성이 있으면 즉시 위험으로 표시한다.
 12. 선택을 DD#으로 기록하고, 첫 구현 순서를 `테스트 → 최소 구현 → 관련 검증`으로 정한다.
-13. 설계 산출물을 → `4.1 test-first ($sk-test-first)`에 대상 T#와 보존 인터페이스로 인계한다.
+13. 설계 산출물을 → `4.0 build-loop ($sk-build-loop)` 또는 `4.1 test-first ($sk-test-first)`에 대상 T#와 보존 인터페이스로 인계한다.
 
 ### 최소 경로 — 시간이 없을 때
 
 1. S# 하나만 고르고, 현재 입력→출력 흐름 4칸을 파일·함수 이름과 함께 적는다.
 2. 최소 변경안 A와 필요한 경우의 B를 표의 5개 기준으로 비교한다.
 3. Guard·도메인·출력의 위치와 보존할 인터페이스를 한 줄씩 적는다.
-4. DD# 하나를 기록하고 → `4.1 test-first ($sk-test-first)`로 넘긴다.
+4. DD# 하나를 기록하고 → `4.0 build-loop ($sk-build-loop)` 또는 `4.1 test-first ($sk-test-first)`로 넘긴다.
 
 ## 판단 기준·분기
 
@@ -108,7 +108,7 @@ git diff --stat
 4. 대안 비교 표: A/B의 요구 충족·변경 범위·테스트·위험·시간·되돌림을 같은 열로 비교한다.
 5. 선택 DD#: 선택 이유, 포기한 것, 최소 구현 순서를 적는다.
 6. 위험·중단 게이트: G#/A#와 확인 행동을 적는다.
-7. 다음 단계: → `4.1 test-first ($sk-test-first)`를 한 줄로 제안한다.
+7. 다음 단계: → `4.0 build-loop ($sk-build-loop)`(슬라이스 한 바퀴) 또는 `4.1 test-first ($sk-test-first)`를 한 줄로 제안한다.
 
 ## 완료 기준
 

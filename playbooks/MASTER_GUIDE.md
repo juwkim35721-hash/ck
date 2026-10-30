@@ -17,7 +17,7 @@
 ├── README.md, src/, data/ …     ← 과제 파일 (Codex가 구현하는 대상)
 ├── sk/                          ← 이 저장소 (도구. 과제 코드가 아님)
 │   ├── prompts/0-start … 9-qa/  ← 단계별 전략 프롬프트
-│   ├── skill/sk-*/SKILL.md      ← 스킬 원본 37개
+│   ├── skill/sk-*/SKILL.md      ← 스킬 원본 38개
 │   ├── templates/  snippets/    ← 템플릿 3종, 스니펫 2종
 │   ├── scripts/install.py, help.py
 │   └── work/                    ← 작업 노트 (설치 시 생성, git에 안 올라감)
@@ -28,7 +28,7 @@
 설치가 하는 일은 네 가지뿐입니다.
 
 1. 과제 루트 `AGENTS.md`에 `SK-KIT:BEGIN/END` 관리 구역을 추가합니다. 기존 내용은 그대로 두고, 바뀌는 파일은 먼저 `sk/.install/backups/`에 백업합니다.
-2. `sk/skill/`의 37개 스킬을 `.agents/skills/`로 복사합니다. Codex는 실행 위치의 `.agents/skills`를 읽습니다.
+2. `sk/skill/`의 38개 스킬을 `.agents/skills/`로 복사합니다. Codex는 실행 위치의 `.agents/skills`를 읽습니다.
 3. 과제 루트가 git 저장소라면 `.git/info/exclude`에 `sk/`, 설치한 스킬, 새로 만든 `AGENTS.md`를 넣어 `git status`를 깨끗하게 유지합니다. 이 설정은 로컬 전용이라 커밋되지 않습니다.
 4. 작업 노트 폴더 `sk/work/`를 만듭니다.
 
@@ -85,7 +85,7 @@ Codex 입력창에서 차례로 확인합니다.
 | 10:12–10:22 | **1 발굴·DM** | 1.0 라운드 0 (개별 진행: 1.1 → 1.2 → 1.3) | **첫 DM 발송** (늦어도 10:22) |
 | 10:22–10:40 | **1·2 정리·동결** | (기다리며 2.2, 0.3 보강) → 1.0 답변 라운드 반복·마감 → 2.1 → 2.3 → 2.4 (개별 진행: 1.4 → 2.1 → 2.3 → 1.5 → 2.4) | `SPEC.md` 0절이 READY 또는 READY-WITH-ASSUMPTIONS |
 | 10:40–10:50 | 3 계획·설계 | 3.1 → 3.2 | `PLAN.md` 슬라이스, `DECISIONS.md` DD 1~2개 |
-| 10:50–12:00 | 4·5 구현 루프 | 슬라이스마다 4.1 → 4.2 → 4.3 → 5.1/5.2 (+ 5.3·5.4·5.5) · 남은 질문은 1.0 병행 라운드 | P0 슬라이스 모두 PASS 증거 |
+| 10:50–12:00 | 4·5 구현 루프 | 슬라이스마다 4.0 한 바퀴 (개별 진행: 4.1 → 4.2 → 4.3 → 5.1/5.2, + 5.3·5.4·5.5) · 남은 질문은 1.0 병행 라운드 | P0 슬라이스 모두 PASS 증거 |
 | 12:00–12:15 | 7 리뷰 | 7.1 → 7.2 → 승인한 수정 | 차단·높음 발견(F) 해결 또는 한계로 기록 |
 | 12:15–12:35 | 마무리 문서 | 9.1 → 9.4 → 8.1 → 9.2 | 보고서 저장, `QA_CARD.md` 완성 |
 | 12:35–12:45 | 제출 점검 | 8.2 | 판정 GO |
@@ -167,7 +167,7 @@ Rn  $sk-clarify-loop + 답변 원문 붙여넣기    → 원문 보존, P 변환
 
 ```text
 3.1 plan (슬라이스 S1..Sn, P0 먼저, 위험 실험 먼저) → 3.2 design (대안 A/B 비교 → DD#)
-  └─ 슬라이스마다 반복:
+  └─ 슬라이스마다 반복 (4.0 build-loop 한 번 = 아래 한 바퀴):
      4.1 test-first (T#를 실패하는 테스트로) → 4.2 implement (최소 변경)
      → 4.3 harden (관련 엣지 케이스) → 5.1 verify + 5.2 evidence (E# 기록)
      → 데이터 과제 5.3 / API 과제 5.4 / UI 과제 5.5
@@ -177,6 +177,29 @@ Rn  $sk-clarify-loop + 답변 원문 붙여넣기    → 원문 보존, P 변환
 - **결정은 바로 기록**: 구현 중 선택이 생기면 [3.3 decision-log](../prompts/3-plan/3.3-decision-log.md)로 DD#를, AI가 처음 만든 코드의 문제를 내가 발견해 고치게 했다면 **AI 교정 기록 AI#**를 남깁니다. 보고서 4절과 후속 Q4(검증 및 AI 교정)의 핵심 근거입니다.
 - **증거는 실행으로만**: 테스트·명령을 실제로 실행한 결과만 E#로 기록합니다. 코드가 바뀌면 이전 증거는 STALE이 되어 다시 실행합니다.
 - **엣지 케이스**(원본 가이드의 7대 범주): 결측·빈 값, 경계값·이상치·0 나누기, 타입·스키마 오염, 중복·멱등성, 동점 정렬, 권한·상태 전이(4xx), 서버 바인딩·경로. 현재 기능과 관련된 범주만, 담당자 정책 P#에 근거해 방어하고 회귀 테스트로 남깁니다.
+
+### 5.0 한 번에 돌리는 구현 루프 (4.0 build-loop) — 권장
+
+4.1 → 4.2 → 4.3 → 5.1/5.2를 슬라이스마다 따로 부르는 대신 `$sk-build-loop` 하나로 한 바퀴를 돕니다. 각 단계의 세부 규칙은 원래 스킬을 그대로 따르고, 루프는 단계별 게이트·멈춤 조건·판정만 맡습니다.
+
+```text
+python3 sk/scripts/help.py 4.0 -p    → 기본: 슬라이스 하나를 자동 모드로 한 바퀴
+$sk-build-loop + 다음 줄 "S2 진행"    → 짧게: 시험 중 가장 빠른 입력
+python3 sk/scripts/help.py 4.0 -b    → 확인 · 빠른 · 연속 · 재개 · 재작업 변형 목록
+```
+
+| 단계 | 하는 일 | 다음으로 넘어가는 조건(게이트) |
+| :--- | :--- | :--- |
+| 0 착수 점검 | 명세 READY 계열, 슬라이스 행, T# 기대값 근거, 테스트 명령·기준선, 설계 DD#, 시간 상한(기본 20분)을 확인하고 슬라이스 선언 | 6개 모두 통과 |
+| 1 RED | T#를 기존 테스트 관례로 작성하고 그것만 실행 | 모든 T#가 "미구현 때문에" 실패 (설정 오류와 구분) |
+| 2 GREEN | 최소 변경, 대상·영향 테스트 실행 | 대상 통과, 새 실패 0, 인터페이스 유지 |
+| 3 방어 | 관련 경계 1~3개를 P#/A#/C# 근거가 있을 때만 막고 회귀 T# 추가 | 방어 테스트 통과, 스키마·정렬 유지 |
+| 4 검증 | 정상·경계·실패 경로 + 전체 스위트, 유형별 5.3/5.4/5.5, STALE 증거 재실행 | 독립 기대값으로 PASS, 기준선 대비 새 실패 0 |
+| 5 판정 | 완료 / 완료-가정 / 부분 / 막힘 / 분할 / 재작업 + 슬라이스 설명 3문장 | — |
+
+- **모드**: 자동(기본, 멈춤 조건에서만 멈춤) · 확인(선언 뒤와 RED 뒤에 내 승인. 6문항에서 설명해야 할 핵심 로직에 권장) · 빠른(시간 부족, 최소 테스트만) · 연속(P0 슬라이스를 순서대로, 완료가 아니면 즉시 중단).
+- **스스로 멈추는 경우**: 명세에 없는 정책(→ 1.0 병행 라운드), 같은 실패에 수정 2회 초과(→ 6.2·6.1), 인터페이스·기존 테스트 기대값을 바꿔야 함(→ 3.2), 기존 테스트 수정·삭제·skip이 필요함(내 확인), 기준선에 없던 원인 불명 실패(→ 6.1), 새 패키지·네트워크 필요(내 승인), 상한 초과(→ 3.1 분할), 리뷰 시각 경과(→ 6.5).
+- **기록**: `PLAN.md` 맨 위 `## 구현 루프 상태판`에 슬라이스별 RED·GREEN·방어·검증 E#, 판정, 소요 분, **슬라이스 설명 3문장**, 병행 질문 후보가 쌓입니다. 슬라이스 설명은 9.1 understand와 6문항 대비에 그대로 씁니다.
 
 ## 6. 막힐 때 (6단계)와 Codex 응급 명령
 
@@ -244,8 +267,8 @@ rm -rf sk
 | `sk/templates/DM_QUESTION_TEMPLATES.txt` (담당자 질문 양식) | [1.0 clarify-loop](../prompts/1-discover/1.0-clarify-loop.md) / `$sk-clarify-loop`, [1.3 dm-questions](../prompts/1-discover/1.3-dm-questions.md) / `$sk-dm-questions` | 모호성 G를 담당자에게 물을 때. 범주별 패턴 P01~P14와 상황별 형식 M01~M11을 골라 실제 값으로 채우고 체크리스트로 점검. 1.4·1.5도 후속·재진술 형식(M03~M07, M11)을 사용 |
 | `sk/templates/SUBMISSION_DOC_TEMPLATE.md` (계획·의사결정·검증 보고서) | [8.1 report](../prompts/8-submit/8.1-report.md) / `$sk-report` | 제출 보고서 작성. 5개 절을 작업 노트 근거로 채움 |
 | `sk/templates/POST_QA_6_TEMPLATE.md` (6문항 암기 카드) | [9.2 qa-card](../prompts/9-qa/9.2-qa-card.md) / `$sk-qa-card` | 제출 전 Q1~Q6 카드 작성 (AI 허용 시간에만) |
-| `sk/snippets/data_audit.py` (데이터 감사) | [1.0 clarify-loop](../prompts/1-discover/1.0-clarify-loop.md), [1.2 ambiguity](../prompts/1-discover/1.2-ambiguity.md), [2.2 io-contract](../prompts/2-spec/2.2-io-contract.md), [5.3 data-validation](../prompts/5-verify/5.3-data-validation.md) | CSV·JSON·JSONL 데이터가 있을 때: 결측·음수·중복 수치로 DM 질문 근거 확보, 입력 계약 작성, 결과 검산 전 원본 특성 확인 |
-| `sk/snippets/smoke_test.py` (HTTP 도달성 확인) | [5.4 api-contract](../prompts/5-verify/5.4-api-contract.md), [5.5 ui-smoke](../prompts/5-verify/5.5-ui-smoke.md), [8.2 deliver](../prompts/8-submit/8.2-deliver.md) | 서버를 띄운 뒤 응답 여부를 먼저 확인. 상세 계약 검증 전 1차 점검 |
+| `sk/snippets/data_audit.py` (데이터 감사) | [1.0 clarify-loop](../prompts/1-discover/1.0-clarify-loop.md), [1.2 ambiguity](../prompts/1-discover/1.2-ambiguity.md), [2.2 io-contract](../prompts/2-spec/2.2-io-contract.md), [4.0 build-loop](../prompts/4-build/4.0-build-loop.md), [5.3 data-validation](../prompts/5-verify/5.3-data-validation.md) | CSV·JSON·JSONL 데이터가 있을 때: 결측·음수·중복 수치로 DM 질문 근거 확보, 입력 계약 작성, 결과 검산 전 원본 특성 확인 |
+| `sk/snippets/smoke_test.py` (HTTP 도달성 확인) | [4.0 build-loop](../prompts/4-build/4.0-build-loop.md), [5.4 api-contract](../prompts/5-verify/5.4-api-contract.md), [5.5 ui-smoke](../prompts/5-verify/5.5-ui-smoke.md), [8.2 deliver](../prompts/8-submit/8.2-deliver.md) | 서버를 띄운 뒤 응답 여부를 먼저 확인. 상세 계약 검증 전 1차 점검 |
 
 ```bash
 python3 sk/snippets/data_audit.py data/sensor_log.csv
@@ -264,7 +287,7 @@ Codex가 단계마다 정해진 파일·섹션에 기록합니다. 대화가 압
 | `DISCOVERY.md` | 필수 제출물, 요구사항 후보 R, 제약 C, 모호성 G, 스캔 커버리지(1.0) | 1 |
 | `DM_LOG.md` | 질의 루프 상태판(1.0), 보낸 메시지 M#, 답변 원문, 해석, 확정 정책 목록 P | 1 |
 | `SPEC.md` | **단일 기준 문서**: 한 장 요약, Top 5 규칙, R·C·P·A·G, 계약, 수용 테스트 표 T, 추적표, 변경 기록, 게이트 | 2 (이후 계속 참조) |
-| `PLAN.md` | 시간 예산, 슬라이스 S, 위험 실험, 축소 결정, 상태 캡슐 | 3·4·6 |
+| `PLAN.md` | 구현 루프 상태판, 시간 예산, 슬라이스 S, 위험 실험, 축소 결정, 상태 캡슐 | 3·4·6 |
 | `DECISIONS.md` | 설계 결정 DD#, AI 교정 기록 AI# | 3·4·6·7 |
 | `EVIDENCE.md` | 실행 증거 E# (명령, 결과, 판정, 코드 상태) | 4·5·6 |
 | `REVIEW.md` | 리뷰 발견 F#, 준수 감사 | 7 |
